@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Login
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -20,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.kaiju.app.ui.screen.PantallaInicioSesionEvento
+import com.kaiju.app.ui.screen.PantallaListaProductos
 import com.kaiju.app.viewmodel.InicioSesionViewModel
 
 @Composable
@@ -39,6 +38,12 @@ fun AppNavHost(viewModel: InicioSesionViewModel = viewModel()) {
                     icon = { Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null) },
                     label = { Text("Inicio Sesión") }
                 )
+                NavigationBarItem(
+                    selected = rutaActual == Rutas.Catalogo.ruta,
+                    onClick = {navController.navigate(Rutas.Catalogo.ruta) {launchSingleTop = true} },
+                    icon = {Icon(Icons.AutoMirrored.Filled.List, contentDescription = null)},
+                    label = {Text("Catalogo")}
+                )
             }
         }
     ) { innerPadding ->
@@ -50,6 +55,10 @@ fun AppNavHost(viewModel: InicioSesionViewModel = viewModel()) {
             composable(Rutas.InicioSesion.ruta) {
                 PantallaInicioSesionEvento(viewModel = viewModel)
             }
+            composable(Rutas.Catalogo.ruta){
+                PantallaListaProductos()
+            }
         }
+
     }
 }
