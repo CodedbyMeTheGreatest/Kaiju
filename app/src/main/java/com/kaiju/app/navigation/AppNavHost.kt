@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Login
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -17,12 +18,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.kaiju.app.ui.screen.PantallaFormularioProductoEvento
 import com.kaiju.app.ui.screen.PantallaInicioSesionEvento
 import com.kaiju.app.ui.screen.PantallaListaProductos
+import com.kaiju.app.viewmodel.FormularioProductoViewModel
 import com.kaiju.app.viewmodel.InicioSesionViewModel
 
 @Composable
-fun AppNavHost(viewModel: InicioSesionViewModel = viewModel()) {
+fun AppNavHost(viewModelInicioSesion: InicioSesionViewModel = viewModel(), viewModelFormularioProducto: FormularioProductoViewModel = viewModel()) {
     val navController = rememberNavController()
 
     // Ruta de la pantalla que se está mostrando ahora (para marcar el menú).
@@ -53,10 +56,15 @@ fun AppNavHost(viewModel: InicioSesionViewModel = viewModel()) {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Rutas.InicioSesion.ruta) {
-                PantallaInicioSesionEvento(viewModel = viewModel)
+                PantallaInicioSesionEvento(viewModel = viewModelInicioSesion)
             }
             composable(Rutas.Catalogo.ruta){
-                PantallaListaProductos()
+                PantallaListaProductos(onAgregarProducto = {
+                    navController.navigate(Rutas.GestionProducto.ruta)
+                })
+            }
+            composable(Rutas.GestionProducto.ruta){
+                PantallaFormularioProductoEvento(viewModelFormularioProducto)
             }
         }
 
