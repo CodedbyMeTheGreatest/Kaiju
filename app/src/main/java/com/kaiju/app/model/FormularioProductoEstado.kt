@@ -29,5 +29,6 @@ data class ErroresProducto(
     val errorTipoProducto: String? = null,
     val errorPrecio: String? = null,
     val errorStockActual: String? = null,
-    val errorStockMinimo: String? = null
+    val errorStockMinimo: String? = null,
+    val errorDetalle: String? = null
 )
