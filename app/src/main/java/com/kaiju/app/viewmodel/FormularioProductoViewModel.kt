@@ -6,6 +6,7 @@ import com.kaiju.app.model.ErroresProducto
 import com.kaiju.app.model.FormularioProductoEstado
 import com.kaiju.app.model.Producto
 import com.kaiju.app.model.TipoProducto
+import com.kaiju.app.repository.productosFicticios
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,7 +36,7 @@ class FormularioProductoViewModel: ViewModel(){
 
     fun actualizarStockActual(valor: Int) = _estadoFormulario.update { it.copy(stockActual = valor) }
 
-    fun actualizarDescripcion(valor: Int) = _estadoFormulario.update { it.copy(stockMinimo = valor) }
+    fun actualizarStockMinimo(valor: Int) = _estadoFormulario.update { it.copy(stockMinimo = valor) }
 
     fun actualizarDetalle(valor: String) = _estadoFormulario.update { it.copy(detalle = valor) }
 
@@ -44,12 +45,15 @@ class FormularioProductoViewModel: ViewModel(){
         val estado = _estadoFormulario.value
 
         val errorCodigo =  if(estado.codigo.isBlank()) "El código es obligatorio" else null
+
         //Validar que el codigo sea unico
+
+
 
 
         val errorNombre =  if(estado.nombre.isBlank()) "El nombre es obligatorio"  else null
 
-        //val errorDescripcion =  if(estado.descripcion.isBlank()) "El código es obligatorio"  else null
+        val errorDescripcion =  if(estado.descripcion.isBlank()) "El código es obligatorio"  else null
 
         val errorCategoria =  if(estado.categoria == CategoriaProducto.SinCategoria) "El código es obligatorio"  else null
         //validar que la categoria correspendo a algun enum
@@ -67,13 +71,37 @@ class FormularioProductoViewModel: ViewModel(){
         //revisar si este es obligatorio o no. Yo creo que si.
 
 
-        //val errorDetalle =  if(estado.detalle.isBlank()) "El código es obligatorio"  else null
+        val errorDetalle =  if(estado.detalle.isBlank()) "El código es obligatorio"  else null
 
         _estadoFormulario.update{
             it.copy(errores = ErroresProducto(errorCodigo, errorNombre, errorCategoria, errorTipo, errorPrecio, errorStockActual, errorStockMinimo))
         }
 
-        return errorCodigo == null &&  errorNombre == null && errorCategoria  == null && errorTipo  == null && errorPrecio  == null && errorStockActual  == null && errorStockMinimo  == null
+        return errorCodigo == null &&  errorNombre == null && errorCategoria  == null && errorTipo  == null && errorPrecio  == null && errorStockActual  == null && errorStockMinimo  == null && errorDescripcion == null && errorDetalle == null
 
+    }
+
+    fun guardarProducto(): Boolean {
+        if (!validarFormulario()) return false
+
+        val estado = _estadoFormulario.value
+
+        val nuevoProducto = Producto(
+            codigo = estado.codigo.trim(),
+            nombre = estado.nombre.trim(),
+            descripcion = estado.descripcion.trim(),
+            categoria = estado.categoria,
+            tipo = estado.tipo,
+            precio = estado.precio,
+            stockActual = estado.stockActual,
+            stockMinimo = estado.stockMinimo,
+            detalle = estado.detalle.trim()
+        )
+
+        productosFicticios.add(nuevoProducto)
+
+        _estadoFormulario.value = FormularioProductoEstado()
+
+        return true
     }
 }
