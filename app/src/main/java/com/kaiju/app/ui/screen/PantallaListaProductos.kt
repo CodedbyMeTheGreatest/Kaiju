@@ -10,17 +10,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.kaiju.app.model.FormularioProductoEstado
-import com.kaiju.app.model.Producto
-import com.kaiju.app.repository.productosFicticios
 import com.kaiju.app.ui.components.ListaProductos
+import com.kaiju.app.viewmodel.ListaProductosViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaListaProductos(
+    viewModel: ListaProductosViewModel,
     onAgregarProducto: () -> Unit ){
-    val productos = productosFicticios
+
+    val listaProductos by viewModel.productos.collectAsState()
 
     Scaffold(topBar = {
         TopAppBar(title = {
@@ -33,5 +35,5 @@ fun PantallaListaProductos(
             }
         }
     )
-    { padding -> ListaProductos(productos = productos, modifier = Modifier.padding(padding)) }
+    { padding -> ListaProductos(productos = listaProductos, modifier = Modifier.padding(padding)) }
 }

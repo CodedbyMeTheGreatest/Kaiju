@@ -1,26 +1,32 @@
 package com.kaiju.app.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.kaiju.app.model.CategoriaProducto
 import com.kaiju.app.model.ErroresProducto
 import com.kaiju.app.model.FormularioProductoEstado
 import com.kaiju.app.model.Producto
 import com.kaiju.app.model.TipoProducto
-import com.kaiju.app.repository.productosFicticios
+import com.kaiju.app.repository.ProductoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class FormularioProductoViewModel: ViewModel(){
+class FormularioProductoViewModel(private val repositorioProducto: ProductoRepository): ViewModel(){
 
     private val _estadoFormulario = MutableStateFlow(FormularioProductoEstado())
 
     val estadoFormulario: StateFlow<FormularioProductoEstado> = _estadoFormulario.asStateFlow()
 
-    private val _productos = MutableStateFlow<List<Producto>>(emptyList())
-
-    val productos: StateFlow<List<Producto>> = _productos.asStateFlow()
+    private val productos: StateFlow<List<Producto>> = repositorioProducto.productos.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = emptyList()
+    )
 
     fun actualizarCodigo(valor: String) = _estadoFormulario.update { it.copy(codigo = valor) }
 
@@ -45,10 +51,7 @@ class FormularioProductoViewModel: ViewModel(){
         val estado = _estadoFormulario.value
 
         val errorCodigo =  if(estado.codigo.isBlank()) "El código es obligatorio" else null
-
         //Validar que el codigo sea unico
-
-
 
 
         val errorNombre =  if(estado.nombre.isBlank()) "El nombre es obligatorio"  else null
@@ -98,7 +101,7 @@ class FormularioProductoViewModel: ViewModel(){
             detalle = estado.detalle.trim()
         )
 
-        productosFicticios.add(nuevoProducto)
+        viewModelScope.launch { repositorioProducto.guardar(nuevoProducto) }
 
         _estadoFormulario.value = FormularioProductoEstado()
 

@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,11 +27,21 @@ import com.kaiju.app.ui.screen.PantallaListaProductos
 import com.kaiju.app.ui.screen.PantallaMovimiento
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
 import com.kaiju.app.viewmodel.FormularioProductoViewModel
+import com.kaiju.app.viewmodel.FormularioProductoViewModelFactory
 import com.kaiju.app.viewmodel.InicioSesionViewModel
+import com.kaiju.app.viewmodel.ListaProductosViewModel
+import com.kaiju.app.viewmodel.ListaProductosViewModelFactory
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavHost(viewModelInicioSesion: InicioSesionViewModel = viewModel(), viewModelFormularioProducto: FormularioProductoViewModel = viewModel(), viewModelFormularioMovimiento: FormularioMovimientoViewModel = viewModel()) {
+fun AppNavHost(viewModelInicioSesion: InicioSesionViewModel = viewModel(),
+               viewModelFormularioProducto: FormularioProductoViewModel = viewModel(factory = FormularioProductoViewModelFactory(
+                   LocalContext.current)), viewModelFormularioMovimiento: FormularioMovimientoViewModel = viewModel(),
+               viewModelListaProductos: ListaProductosViewModel = viewModel(factory = ListaProductosViewModelFactory(
+                   LocalContext.current
+               )
+               ),
+               ) {
     val navController = rememberNavController()
 
     // Ruta de la pantalla que se está mostrando ahora (para marcar el menú).
@@ -70,7 +81,7 @@ fun AppNavHost(viewModelInicioSesion: InicioSesionViewModel = viewModel(), viewM
                 PantallaInicioSesionEvento(viewModel = viewModelInicioSesion)
             }
             composable(Rutas.Catalogo.ruta){
-                PantallaListaProductos(onAgregarProducto = {
+                PantallaListaProductos(viewModel =  viewModelListaProductos, onAgregarProducto = {
                     navController.navigate(Rutas.GestionProducto.ruta)
                 })
             }

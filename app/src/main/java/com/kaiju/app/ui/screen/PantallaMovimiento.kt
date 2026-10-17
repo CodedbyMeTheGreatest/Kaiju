@@ -7,10 +7,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -76,7 +76,7 @@ fun PantallaMovimiento(
                 opciones = tiposPermitidos,
                 textoOpcion = { it.etiqueta() },
                 onSeleccion = { viewModel.actualizarTipo(it) },
-                icono = Icons.Default.List,
+                icono = Icons.AutoMirrored.Filled.List,
                 error = errores.errorTipoMovimiento
             )
 
@@ -87,7 +87,7 @@ fun PantallaMovimiento(
                 leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) },
                 trailingIcon = {
                     if (errores.errorCantidad != null)
-                        Icon(Icons.Default.Warning, co  ntentDescription = "Error")
+                        Icon(Icons.Default.Warning, contentDescription = "Error")
                 },
                 isError = errores.errorCantidad != null,
                 supportingText = { errores.errorCantidad?.let { Text(it) } },
@@ -155,7 +155,7 @@ private fun <T> CampoSelector(
             isError = error != null,
             supportingText = { error?.let { Text(it) } },
             modifier = Modifier
-                .menuAnchor()
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                 .fillMaxWidth()
         )
         ExposedDropdownMenu(

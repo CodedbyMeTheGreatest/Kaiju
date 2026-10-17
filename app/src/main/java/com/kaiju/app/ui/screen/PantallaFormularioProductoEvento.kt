@@ -1,5 +1,6 @@
 package com.kaiju.app.ui.screen
 
+import android.R.attr.enabled
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -24,6 +26,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kaiju.app.model.CategoriaProducto
@@ -91,7 +95,7 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                     isError = estado.errores.errorCategoria != null,
                     supportingText = { estado.errores.errorCategoria?.let { Text(it) } },
                     singleLine = true,
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true).fillMaxWidth()
                 )
 
                 ExposedDropdownMenu(
@@ -124,7 +128,7 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                     supportingText = { estado.errores.errorTipoProducto?.let { Text(it) } },
                     singleLine = true,
                     modifier = Modifier
-                        .menuAnchor()
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                         .fillMaxWidth()
                 )
 
