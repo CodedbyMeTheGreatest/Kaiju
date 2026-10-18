@@ -11,6 +11,9 @@ interface ProductoDao {
     @Query("SELECT * FROM productos ORDER BY id DESC")
     fun obtenerTodos(): Flow<List<Producto>>
 
+    @Query("SELECT * FROM productos WHERE codigo = :codigo LIMIT 1")
+    fun obtenerPorCodigo(codigo: String): Flow<Producto?>
+
     @Insert
     suspend fun insertar(producto: Producto)
 

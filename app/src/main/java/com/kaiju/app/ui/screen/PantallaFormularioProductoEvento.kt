@@ -1,6 +1,5 @@
 package com.kaiju.app.ui.screen
 
-import android.R.attr.enabled
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize

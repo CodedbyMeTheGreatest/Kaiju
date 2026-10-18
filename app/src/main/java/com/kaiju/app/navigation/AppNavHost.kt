@@ -17,14 +17,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.kaiju.app.ui.screen.PantallaDetalleProducto
 import com.kaiju.app.ui.screen.PantallaFormularioProductoEvento
 import com.kaiju.app.ui.screen.PantallaInicioSesionEvento
 import com.kaiju.app.ui.screen.PantallaListaProductos
 import com.kaiju.app.ui.screen.PantallaMovimiento
+import com.kaiju.app.viewmodel.DetalleProductoViewModel
+import com.kaiju.app.viewmodel.DetalleProductoViewModelFactory
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
 import com.kaiju.app.viewmodel.FormularioProductoViewModel
 import com.kaiju.app.viewmodel.FormularioProductoViewModelFactory
@@ -34,15 +39,17 @@ import com.kaiju.app.viewmodel.ListaProductosViewModelFactory
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AppNavHost(viewModelInicioSesion: InicioSesionViewModel = viewModel(),
-               viewModelFormularioProducto: FormularioProductoViewModel = viewModel(factory = FormularioProductoViewModelFactory(
-                   LocalContext.current)), viewModelFormularioMovimiento: FormularioMovimientoViewModel = viewModel(),
-               viewModelListaProductos: ListaProductosViewModel = viewModel(factory = ListaProductosViewModelFactory(
-                   LocalContext.current
-               )
-               ),
-               ) {
+fun AppNavHost(
+    viewModelInicioSesion: InicioSesionViewModel = viewModel(),
+    viewModelFormularioProducto: FormularioProductoViewModel = viewModel(factory = FormularioProductoViewModelFactory(
+                   LocalContext.current)),
+    viewModelFormularioMovimiento: FormularioMovimientoViewModel = viewModel(),
+    viewModelListaProductos: ListaProductosViewModel = viewModel(factory = ListaProductosViewModelFactory(
+                   LocalContext.current)),
+
+    ) {
     val navController = rememberNavController()
+    val context = LocalContext.current
 
     // Ruta de la pantalla que se está mostrando ahora (para marcar el menú).
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -81,9 +88,11 @@ fun AppNavHost(viewModelInicioSesion: InicioSesionViewModel = viewModel(),
                 PantallaInicioSesionEvento(viewModel = viewModelInicioSesion)
             }
             composable(Rutas.Catalogo.ruta){
-                PantallaListaProductos(viewModel =  viewModelListaProductos, onAgregarProducto = {
-                    navController.navigate(Rutas.GestionProducto.ruta)
-                })
+                PantallaListaProductos(
+                    viewModel =  viewModelListaProductos,
+                    onAgregarProducto = { navController.navigate(Rutas.GestionProducto.ruta) },
+                    onProductoClick = { codigoProducto -> navController.navigate(Rutas.DetalleProducto.crearRuta(codigoProducto)) }
+                )
             }
             composable(Rutas.GestionProducto.ruta){
                 PantallaFormularioProductoEvento(viewModelFormularioProducto)
@@ -92,6 +101,17 @@ fun AppNavHost(viewModelInicioSesion: InicioSesionViewModel = viewModel(),
                 PantallaMovimiento(
                 viewModel = viewModelFormularioMovimiento, nombreUsuario = "Usuario de prueba"
                 )
+            }
+            composable(
+                route = Rutas.DetalleProducto.ruta,
+                arguments = listOf(navArgument("codigoProducto") { type = NavType.StringType })
+            ) {
+                backStack ->
+                val codigoProducto = backStack.arguments?.getString("codigoProducto")
+                val detalleViewModel: DetalleProductoViewModel = viewModel(factory = DetalleProductoViewModelFactory(context, codigoProducto!!))
+                PantallaDetalleProducto(
+                    viewModel = detalleViewModel,
+                    onVolver = { navController.popBackStack() })
             }
         }
 

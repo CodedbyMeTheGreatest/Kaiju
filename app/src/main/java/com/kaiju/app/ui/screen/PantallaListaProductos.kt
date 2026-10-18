@@ -20,7 +20,8 @@ import com.kaiju.app.viewmodel.ListaProductosViewModel
 @Composable
 fun PantallaListaProductos(
     viewModel: ListaProductosViewModel,
-    onAgregarProducto: () -> Unit ){
+    onAgregarProducto: () -> Unit,
+    onProductoClick: (String) -> Unit){
 
     val listaProductos by viewModel.productos.collectAsState()
 
@@ -35,5 +36,5 @@ fun PantallaListaProductos(
             }
         }
     )
-    { padding -> ListaProductos(productos = listaProductos, modifier = Modifier.padding(padding)) }
+    { padding -> ListaProductos(productos = listaProductos, onProductoClick = onProductoClick ,modifier = Modifier.padding(padding)) }
 }
