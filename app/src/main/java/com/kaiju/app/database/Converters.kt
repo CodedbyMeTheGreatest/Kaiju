@@ -4,6 +4,7 @@ import androidx.room.TypeConverter
 import com.kaiju.app.model.CategoriaProducto
 import com.kaiju.app.model.TipoMovimiento
 import com.kaiju.app.model.TipoProducto
+import java.time.LocalDateTime
 
 class Converters {
     @TypeConverter
@@ -23,4 +24,10 @@ class Converters {
 
     @TypeConverter
     fun toTipoMovimiento(value: String?): TipoMovimiento? = value?.let { enumValueOf<TipoMovimiento>(it) }
+
+    @TypeConverter
+    fun fechaATexto(fecha: LocalDateTime?): String? = fecha?.toString()
+
+    @TypeConverter
+    fun textoAFecha(texto: String?): LocalDateTime? = texto?.let { LocalDateTime.parse(it) }
 }

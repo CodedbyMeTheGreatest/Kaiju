@@ -1,7 +1,5 @@
 package com.kaiju.app.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -31,19 +29,20 @@ import com.kaiju.app.ui.screen.PantallaMovimiento
 import com.kaiju.app.viewmodel.DetalleProductoViewModel
 import com.kaiju.app.viewmodel.DetalleProductoViewModelFactory
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
+import com.kaiju.app.viewmodel.FormularioMovimientoViewModelFactory
 import com.kaiju.app.viewmodel.FormularioProductoViewModel
 import com.kaiju.app.viewmodel.FormularioProductoViewModelFactory
 import com.kaiju.app.viewmodel.InicioSesionViewModel
 import com.kaiju.app.viewmodel.ListaProductosViewModel
 import com.kaiju.app.viewmodel.ListaProductosViewModelFactory
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavHost(
     viewModelInicioSesion: InicioSesionViewModel = viewModel(),
     viewModelFormularioProducto: FormularioProductoViewModel = viewModel(factory = FormularioProductoViewModelFactory(
                    LocalContext.current)),
-    viewModelFormularioMovimiento: FormularioMovimientoViewModel = viewModel(),
+    viewModelFormularioMovimiento: FormularioMovimientoViewModel =
+        viewModel(factory = FormularioMovimientoViewModelFactory(LocalContext.current)),
     viewModelListaProductos: ListaProductosViewModel = viewModel(factory = ListaProductosViewModelFactory(
                    LocalContext.current)),
 

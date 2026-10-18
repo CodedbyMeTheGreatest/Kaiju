@@ -1,7 +1,5 @@
 package com.kaiju.app.ui.screen
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,12 +17,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.kaiju.app.model.Producto
 import com.kaiju.app.model.TipoMovimiento
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PantallaMovimiento(
     viewModel: FormularioMovimientoViewModel,

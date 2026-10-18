@@ -1,24 +1,26 @@
 package com.kaiju.app.viewmodel
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.kaiju.app.model.*
-import com.kaiju.app.repository.InventarioRepository
-import com.kaiju.app.repository.repositorioInventario
+import com.kaiju.app.repository.MovimientoRepository
+import com.kaiju.app.repository.ProductoRepository
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.UUID
 
 class FormularioMovimientoViewModel(
-    private val repositorio: InventarioRepository = repositorioInventario
+    private val movimientoRepository: MovimientoRepository, productoRepository: ProductoRepository
 ) : ViewModel() {
 
     private val _estado = MutableStateFlow(FormularioMovimientoEstado())
     val estado: StateFlow<FormularioMovimientoEstado> = _estado.asStateFlow()
 
-    val productos: StateFlow<List<Producto>> = repositorio.productos
+    val productos: StateFlow<List<Producto>> = productoRepository.productos.stateIn(viewModelScope,
+        SharingStarted.Eagerly, emptyList())
 
+    private fun buscarProducto(codigo: String): Producto? = productos.value.find { it.codigo == codigo }
     fun actualizarProducto(codigo: String) = _estado.update { it.copy(codigoProducto = codigo) }
     fun actualizarTipo(tipo: TipoMovimiento) = _estado.update { it.copy(tipo = tipo) }
     fun actualizarCantidad(valor: String) = _estado.update { it.copy(cantidad = valor) }
@@ -33,7 +35,7 @@ class FormularioMovimientoViewModel(
     fun validarFormulario(): Boolean {
         val estado = _estado.value
         val tipo = estado.tipo
-        val producto = repositorio.obtenerProducto(estado.codigoProducto)
+        val producto = buscarProducto(estado.codigoProducto)
         val cantidad = estado.cantidad.trim().toIntOrNull()
         val esAjuste = tipo == TipoMovimiento.AJUSTE
 
@@ -55,26 +57,27 @@ class FormularioMovimientoViewModel(
         return !errores.hayErrores
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun guardarMovimiento(usuario: String): Boolean {
         if (!validarFormulario()) return false
         val estado = _estado.value
         val tipo = estado.tipo ?: return false
-        val producto = repositorio.obtenerProducto(estado.codigoProducto) ?: return false
+        val producto = buscarProducto(estado.codigoProducto) ?: return false
         val cantidad = estado.cantidad.trim().toIntOrNull() ?: return false
 
-        repositorio.registrarMovimiento(
-            movimiento = Movimiento(
-                id = UUID.randomUUID().toString(),
-                codigoProducto = producto.codigo,
-                tipoMovimiento = tipo,
-                cantidad = cantidad,
-                motivo = estado.motivo.trim(),
-                fecha = LocalDateTime.now(),
-                usuario = usuario
-            ),
-            nuevoStock = calcularNuevoStock(producto.stockActual, tipo, cantidad)
-        )
+
+        val movimiento = Movimiento(
+            id = UUID.randomUUID().toString(),
+            codigoProducto = producto.codigo,
+            tipoMovimiento = tipo,
+            cantidad = cantidad,
+            motivo = estado.motivo.trim(),
+            fecha = LocalDateTime.now(),
+            usuario = usuario
+         )
+        val nuevoStock = calcularNuevoStock(producto.stockActual, tipo, cantidad)
+
+        viewModelScope.launch {movimientoRepository.registrarMovimiento(movimiento,nuevoStock)}
+
         _estado.value = FormularioMovimientoEstado()
         return true
     }

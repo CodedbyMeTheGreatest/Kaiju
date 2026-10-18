@@ -1,9 +1,13 @@
 package com.kaiju.app.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName="productos")
+@Entity(
+    tableName = "productos",
+    indices = [Index(value = ["codigo"], unique = true)]
+)
 data class Producto (
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

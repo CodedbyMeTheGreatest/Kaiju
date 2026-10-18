@@ -3,6 +3,7 @@ package com.kaiju.app.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaiju.app.model.DetalleProductoEstado
+import com.kaiju.app.repository.MovimientoRepository
 import com.kaiju.app.repository.ProductoRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
