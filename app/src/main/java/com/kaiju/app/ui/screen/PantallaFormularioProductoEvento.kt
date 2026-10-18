@@ -26,8 +26,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kaiju.app.model.CategoriaProducto
@@ -82,12 +80,13 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
+
             ExposedDropdownMenuBox(
                 expanded = menuCategoria,
                 onExpandedChange = { menuCategoria = !menuCategoria }
             ) {
                 OutlinedTextField(
-                    value = estado.categoria.name,
+                    value = estado.categoria?.name ?: "",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Categoría") },
@@ -104,7 +103,7 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 ) {
                     CategoriaProducto.entries.forEach { op ->
                         DropdownMenuItem(
-                            text = { Text(op.name) },
+                            text = { Text("Tipo de Categoría") },
                             onClick = {
                                 viewModel.actualizarCategoria(op)
                                 menuCategoria = false
@@ -119,7 +118,7 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 onExpandedChange = { menuTipo = !menuTipo }
             ) {
                 OutlinedTextField(
-                    value = estado.tipo.name, // Asegúrate de que esto sea un String (ej. estado.tipo.name)
+                    value = estado.tipo?.name ?: "",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Tipo") },
@@ -138,7 +137,7 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 ) {
                     TipoProducto.entries.forEach { op ->
                         DropdownMenuItem(
-                            text = { Text(op.name) },
+                            text = { Text("Tipo de Producto") },
                             onClick = {
                                 viewModel.actualizarTipo(op)
                                 menuTipo = false

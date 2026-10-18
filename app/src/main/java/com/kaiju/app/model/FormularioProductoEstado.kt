@@ -12,8 +12,8 @@ data class FormularioProductoEstado(
     val codigo: String = "",
     val nombre: String = "",
     val descripcion: String = "",
-    val categoria: CategoriaProducto = CategoriaProducto.SinCategoria,
-    val tipo: TipoProducto = TipoProducto.SinTipo,
+    val categoria: CategoriaProducto? = null,
+    val tipo: TipoProducto? = null,
     val precio: Int = 0,
     val stockActual: Int = 0,
     val stockMinimo: Int = 0,
@@ -31,4 +31,9 @@ data class ErroresProducto(
     val errorStockActual: String? = null,
     val errorStockMinimo: String? = null,
     val errorDetalle: String? = null
-)
+){
+    val hayErrores: Boolean
+        get() = errorCodigo != null || errorNombre != null || errorDescripcion != null ||
+                errorCategoria != null || errorTipoProducto != null || errorPrecio != null ||
+                errorStockActual != null || errorStockMinimo != null || errorDetalle != null
+}

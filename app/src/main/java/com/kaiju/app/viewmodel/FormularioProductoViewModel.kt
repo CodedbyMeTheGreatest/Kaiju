@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class FormularioProductoViewModel(private val repositorioProducto: ProductoRepository): ViewModel(){
-
     private val _estadoFormulario = MutableStateFlow(FormularioProductoEstado())
 
     val estadoFormulario: StateFlow<FormularioProductoEstado> = _estadoFormulario.asStateFlow()
@@ -49,39 +48,44 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
     // Validaciones
     fun validarFormulario(): Boolean {
         val estado = _estadoFormulario.value
+        val listaProductos = productos.value
 
-        val errorCodigo =  if(estado.codigo.isBlank()) "El código es obligatorio" else null
-        //Validar que el codigo sea unico
 
+        val errorCodigo =  when {
+            estado.codigo.isBlank() -> "El código es obligatorio"
+            listaProductos.any { it.codigo == estado.codigo } -> "El código ya existe"
+            else -> null
+        }
 
         val errorNombre =  if(estado.nombre.isBlank()) "El nombre es obligatorio"  else null
+        val errorDescripcion =  if(estado.descripcion.isBlank()) "La descripción es obligatoria"  else null
 
-        val errorDescripcion =  if(estado.descripcion.isBlank()) "El código es obligatorio"  else null
+        val errorCategoria =  if(estado.categoria == null) "La categoría es obligatoria"  else null
+        val errorTipo =  if(estado.tipo == null) "El tipo de producto es obligatorio"  else null
 
-        val errorCategoria =  if(estado.categoria == CategoriaProducto.SinCategoria) "El código es obligatorio"  else null
-        //validar que la categoria correspendo a algun enum
-
-        val errorTipo =  if(estado.tipo == TipoProducto.SinTipo) "El código es obligatorio"  else null
-        //validar que el tipo correspendo a algun enum
-
-        val errorPrecio =  if(estado.precio == 0) "El código es obligatorio"  else null
-        // validar que el tipo sea mayor o igual a cero
-
-        val errorStockActual =  if(estado.stockActual == 0) "El código es obligatorio"  else null
-        // validar que el stock sea mayor o igual a cero
-
-        val errorStockMinimo =  if(estado.stockMinimo == 0) "El código es obligatorio"  else null
-        //revisar si este es obligatorio o no. Yo creo que si.
-
+        val errorPrecio =  if(estado.precio <= 0) "El precio debe ser mayor a cero"  else null
+        val errorStockActual =  if(estado.stockActual < 0) "El stock actual no puede ser negativo ni 0"  else null
+        val errorStockMinimo =  if(estado.stockMinimo < 0) "El stock minimo no puede ser negativo ni 0"  else null
 
         val errorDetalle =  if(estado.detalle.isBlank()) "El código es obligatorio"  else null
 
+        val nuevosErrores = ErroresProducto(
+            errorCodigo = errorCodigo,
+            errorNombre = errorNombre,
+            errorDescripcion = errorDescripcion,
+            errorCategoria = errorCategoria,
+            errorTipoProducto = errorTipo,
+            errorPrecio = errorPrecio,
+            errorStockActual = errorStockActual,
+            errorStockMinimo = errorStockMinimo,
+            errorDetalle = errorDetalle
+        )
+
         _estadoFormulario.update{
-            it.copy(errores = ErroresProducto(errorCodigo, errorNombre, errorCategoria, errorTipo, errorPrecio, errorStockActual, errorStockMinimo))
+            it.copy(errores = nuevosErrores)
         }
 
-        return errorCodigo == null &&  errorNombre == null && errorCategoria  == null && errorTipo  == null && errorPrecio  == null && errorStockActual  == null && errorStockMinimo  == null && errorDescripcion == null && errorDetalle == null
-
+        return !nuevosErrores.hayErrores
     }
 
     fun guardarProducto(): Boolean {
@@ -93,17 +97,18 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
             codigo = estado.codigo.trim(),
             nombre = estado.nombre.trim(),
             descripcion = estado.descripcion.trim(),
-            categoria = estado.categoria,
-            tipo = estado.tipo,
+            categoria = estado.categoria!!,
+            tipo = estado.tipo!!,
             precio = estado.precio,
             stockActual = estado.stockActual,
             stockMinimo = estado.stockMinimo,
             detalle = estado.detalle.trim()
         )
 
-        viewModelScope.launch { repositorioProducto.guardar(nuevoProducto) }
-
-        _estadoFormulario.value = FormularioProductoEstado()
+        viewModelScope.launch {
+            repositorioProducto.guardar(nuevoProducto)
+            _estadoFormulario.value = FormularioProductoEstado()
+        }
 
         return true
     }
