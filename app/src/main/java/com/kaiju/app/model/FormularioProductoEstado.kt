@@ -6,9 +6,9 @@ data class FormularioProductoEstado(
     val descripcion: String = "",
     val categoria: CategoriaProducto? = null,
     val tipo: TipoProducto? = null,
-    val precio: Int = 0,
-    val stockActual: Int = 0,
-    val stockMinimo: Int = 0,
+    val precio: String = "",
+    val stockActual: String = "",
+    val stockMinimo: String = "",
     val detalle: String = "",
     val errores: ErroresProducto = ErroresProducto()
 )

@@ -37,11 +37,11 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
 
     fun actualizarTipo(valor: TipoProducto) = _estadoFormulario.update { it.copy(tipo = valor) }
 
-    fun actualizarPrecio(valor: Int) = _estadoFormulario.update { it.copy(precio = valor) }
+    fun actualizarPrecio(valor: String) = _estadoFormulario.update { it.copy(precio = valor.filter { c -> c.isDigit() }) }
 
-    fun actualizarStockActual(valor: Int) = _estadoFormulario.update { it.copy(stockActual = valor) }
+    fun actualizarStockActual(valor: String) = _estadoFormulario.update { it.copy(stockActual = valor.filter { c -> c.isDigit() }) }
 
-    fun actualizarStockMinimo(valor: Int) = _estadoFormulario.update { it.copy(stockMinimo = valor) }
+    fun actualizarStockMinimo(valor: String) = _estadoFormulario.update { it.copy(stockMinimo = valor.filter { c -> c.isDigit() }) }
 
     fun actualizarDetalle(valor: String) = _estadoFormulario.update { it.copy(detalle = valor) }
 
@@ -49,6 +49,9 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
     fun validarFormulario(): Boolean {
         val estado = _estadoFormulario.value
         val listaProductos = productos.value
+        val precioInt = estado.precio.toIntOrNull()
+        val stockActualInt = estado.stockActual.toIntOrNull()
+        val stockMinimoInt = estado.stockMinimo.toIntOrNull()
 
 
         val errorCodigo =  when {
@@ -63,9 +66,22 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
         val errorCategoria =  if(estado.categoria == null) "La categoría es obligatoria"  else null
         val errorTipo =  if(estado.tipo == null) "El tipo de producto es obligatorio"  else null
 
-        val errorPrecio =  if(estado.precio <= 0) "El precio debe ser mayor a cero"  else null
-        val errorStockActual =  if(estado.stockActual < 0) "El stock actual no puede ser negativo ni 0"  else null
-        val errorStockMinimo =  if(estado.stockMinimo < 0) "El stock minimo no puede ser negativo ni 0"  else null
+
+        val errorPrecio = when {
+            estado.precio.isBlank() -> "El precio es obligatorio"
+            precioInt == null || precioInt <= 0 -> "El precio debe ser un número mayor a cero"
+            else -> null
+        }
+        val errorStockActual = when {
+            estado.stockActual.isBlank() -> "El stock actual es obligatorio"
+            stockActualInt == null || stockActualInt < 0 -> "El stock actual debe ser un número mayor o igual a cero"
+            else -> null
+        }
+        val errorStockMinimo = when {
+            estado.stockMinimo.isBlank() -> "El stock mínimo es obligatorio"
+            stockMinimoInt == null || stockMinimoInt < 0 -> "El stock mínimo debe ser un número mayor o igual a cero"
+            else -> null
+        }
 
         val errorDetalle =  if(estado.detalle.isBlank()) "El código es obligatorio"  else null
 
@@ -99,9 +115,9 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
             descripcion = estado.descripcion.trim(),
             categoria = estado.categoria!!,
             tipo = estado.tipo!!,
-            precio = estado.precio,
-            stockActual = estado.stockActual,
-            stockMinimo = estado.stockMinimo,
+            precio = estado.precio.toIntOrNull() ?:0,
+            stockActual = estado.stockActual.toIntOrNull() ?:0,
+            stockMinimo = estado.stockMinimo.toIntOrNull() ?:0,
             detalle = estado.detalle.trim()
         )
 

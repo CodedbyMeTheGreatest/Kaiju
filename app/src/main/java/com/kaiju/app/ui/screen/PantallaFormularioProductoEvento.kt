@@ -102,7 +102,7 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 ) {
                     CategoriaProducto.entries.forEach { op ->
                         DropdownMenuItem(
-                            text = { Text("Tipo de Categoría") },
+                            text = { Text(op.name) },
                             onClick = {
                                 viewModel.actualizarCategoria(op)
                                 menuCategoria = false
@@ -136,7 +136,7 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 ) {
                     TipoProducto.entries.forEach { op ->
                         DropdownMenuItem(
-                            text = { Text("Tipo de Producto") },
+                            text = { Text(op.name) },
                             onClick = {
                                 viewModel.actualizarTipo(op)
                                 menuTipo = false
@@ -147,8 +147,8 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
             }
 
             OutlinedTextField(
-                value = estado.precio.toString(),
-                onValueChange = {valor -> viewModel.actualizarPrecio(valor.toInt())},
+                value = estado.precio,
+                onValueChange = {valor -> viewModel.actualizarPrecio(valor)},
                 label = { Text("Precio") },
                 isError = estado.errores.errorPrecio != null,
                 supportingText = { estado.errores.errorPrecio?.let { Text(it) } },
@@ -159,8 +159,8 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
-                value = estado.stockActual.toString(),
-                onValueChange = {valor -> viewModel.actualizarStockActual(valor.toInt())},
+                value = estado.stockActual,
+                onValueChange = {valor -> viewModel.actualizarStockActual(valor)},
                 label = { Text("Stock Actual") },
                 isError = estado.errores.errorStockActual != null,
                 supportingText = { estado.errores.errorStockActual?.let { Text(it) } },
@@ -171,8 +171,8 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
-                value = estado.stockMinimo.toString(),
-                onValueChange = {valor -> viewModel.actualizarStockMinimo(valor.toInt())},
+                value = estado.stockMinimo,
+                onValueChange = {valor -> viewModel.actualizarStockMinimo(valor)},
                 label = { Text("Stock Mínimo") },
                 isError = estado.errores.errorStockMinimo != null,
                 supportingText = { estado.errores.errorStockMinimo?.let { Text(it) } },
