@@ -8,9 +8,7 @@ import androidx.room.TypeConverters
 import com.kaiju.app.model.Movimiento
 import com.kaiju.app.model.Producto
 
-//En el entities añadir ', Movimiento::class'
-
-@Database(entities = [Producto::class, Movimiento::class], version = 1, exportSchema = false)
+@Database(entities = [Producto::class, Movimiento::class], version = 2, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class TiendaDatabase : RoomDatabase() {
 
@@ -20,16 +18,18 @@ abstract class TiendaDatabase : RoomDatabase() {
 
     companion object{
         @Volatile private var instancia: TiendaDatabase? = null
-
-        fun obtenerInstancia(contexto: Context): TiendaDatabase =
-            instancia ?: synchronized(this) {
-                instancia ?: Room.databaseBuilder(
-                                contexto.applicationContext,
-                                TiendaDatabase::class.java,
-                                "tienda.db"
-                )
-                .fallbackToDestructiveMigration(false)
-                .build().also { instancia = it }
+            fun obtenerInstancia(contexto: Context): TiendaDatabase {
+                return instancia ?: synchronized(this) {
+                    val instance = Room.databaseBuilder(
+                        contexto.applicationContext,
+                        TiendaDatabase::class.java,
+                        "tienda.db"
+                    )
+                    .fallbackToDestructiveMigration(true)
+                    .build()
+                    instancia = instance
+                    instance
             }
+        }
     }
 }

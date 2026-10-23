@@ -18,7 +18,7 @@ abstract class MovimientoDao {
     @Insert
     abstract suspend fun insertarMovimiento(movimiento: Movimiento)
 
-    @Query("UPDATE productos SET stockActual = :nuevoStock WHERE codigo = :codigo")
+    @Query("UPDATE products SET stockActual = :nuevoStock WHERE codigo = :codigo")
     abstract suspend fun actualizarStock(codigo: String, nuevoStock: Int)
 
     @Transaction

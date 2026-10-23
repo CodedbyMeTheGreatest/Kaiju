@@ -5,7 +5,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "productos",
+    tableName = "products",
     indices = [Index(value = ["codigo"], unique = true)]
 )
 data class Producto (

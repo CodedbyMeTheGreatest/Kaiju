@@ -9,6 +9,8 @@ class ProductoRepository(private val dao: ProductoDao) {
 
     fun obtenerPorCodigo(codigo: String): Flow<Producto?> = dao.obtenerPorCodigo(codigo)
 
+    fun buscarProducto(query: String): Flow<List<Producto>> = dao.buscarProducto(query)
+
     suspend fun guardar(producto: Producto) = dao.insertar(producto)
 
     //suspend fun eliminar(producto: Producto) = dao.eliminar(producto)
