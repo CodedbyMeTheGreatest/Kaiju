@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,11 +22,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.kaiju.app.ui.screen.PantallaAlertas
 import com.kaiju.app.ui.screen.PantallaDetalleProducto
 import com.kaiju.app.ui.screen.PantallaFormularioProductoEvento
 import com.kaiju.app.ui.screen.PantallaInicioSesionEvento
 import com.kaiju.app.ui.screen.PantallaListaProductos
 import com.kaiju.app.ui.screen.PantallaMovimiento
+import com.kaiju.app.viewmodel.AlertasViewModel
+import com.kaiju.app.viewmodel.AlertasViewModelFactory
 import com.kaiju.app.viewmodel.DetalleProductoViewModel
 import com.kaiju.app.viewmodel.DetalleProductoViewModelFactory
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
@@ -44,7 +48,10 @@ fun AppNavHost(
     viewModelFormularioMovimiento: FormularioMovimientoViewModel =
         viewModel(factory = FormularioMovimientoViewModelFactory(LocalContext.current)),
     viewModelListaProductos: ListaProductosViewModel = viewModel(factory = ListaProductosViewModelFactory(
-                   LocalContext.current)),
+                   LocalContext.current)), viewModelAlertas: AlertasViewModel = viewModel(factory = AlertasViewModelFactory(
+        LocalContext.current
+    )
+    )
 
     ) {
     val navController = rememberNavController()
@@ -74,6 +81,12 @@ fun AppNavHost(
                     onClick = { navController.navigate(Rutas.GestionMovimiento.ruta) { launchSingleTop = true } },
                     icon = { Icon(Icons.Default.Add, contentDescription = null) },
                     label = { Text("Movimiento") }
+                )
+                NavigationBarItem(
+                    selected = rutaActual == Rutas.Alertas.ruta,
+                    onClick = { navController.navigate(Rutas.Alertas.ruta) { launchSingleTop = true } },
+                    icon = { Icon(Icons.Default.Warning, contentDescription = null) },
+                    label = { Text("Alertas") }
                 )
             }
         }
@@ -111,6 +124,9 @@ fun AppNavHost(
                 PantallaDetalleProducto(
                     viewModel = detalleViewModel,
                     onVolver = { navController.popBackStack() })
+            }
+            composable(Rutas.Alertas.ruta) {
+                PantallaAlertas(viewModel = viewModelAlertas)
             }
         }
 
