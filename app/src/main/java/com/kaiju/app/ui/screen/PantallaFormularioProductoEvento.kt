@@ -8,11 +8,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,7 +41,7 @@ import com.kaiju.app.viewmodel.FormularioProductoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
+fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel, onVolver: () -> Unit){
     val estado by viewModel.estadoFormulario.collectAsState()
     var menuCategoria by remember { mutableStateOf(false) }
     var menuTipo by remember { mutableStateOf(false) }
@@ -51,7 +55,17 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Agregar Producto") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Agregar Producto") },
+                navigationIcon = {
+                    IconButton(onClick = onVolver)  {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Volver")
+                    }
+                }
+            )
+        }
     ) {
         padding ->
         Column(

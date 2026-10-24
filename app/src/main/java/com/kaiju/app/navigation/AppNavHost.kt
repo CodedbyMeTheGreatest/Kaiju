@@ -86,9 +86,16 @@ fun AppNavHost(
         }
     }
 
+    val rutasConBarras = listOf(
+        Rutas.Catalogo.ruta,
+        Rutas.GestionMovimiento.ruta,
+        Rutas.Alertas.ruta
+    )
+    val mostrarBarra = rutaActual in rutasConBarras
+
     Scaffold(
         bottomBar = {
-            if (rol != null) {
+            if (rol != null && mostrarBarra) {
                 NavigationBar {
                     NavigationBarItem(
                         selected = rutaActual == Rutas.Catalogo.ruta,
@@ -153,7 +160,7 @@ fun AppNavHost(
             }
             composable(Rutas.GestionProducto.ruta){
                 if (rol?.puedeGestionarProductos()==true){
-                    PantallaFormularioProductoEvento(viewModelFormularioProducto)
+                    PantallaFormularioProductoEvento(viewModelFormularioProducto, onVolver = {navController.popBackStack()})
                 }
             }
             composable(Rutas.GestionMovimiento.ruta){
