@@ -30,7 +30,7 @@ import com.kaiju.app.viewmodel.ListaProductosViewModel
 @Composable
 fun PantallaListaProductos(
     viewModel: ListaProductosViewModel,
-    onAgregarProducto: () -> Unit,
+    onAgregarProducto: (()-> Unit)? = null,
     onProductoClick: (String) -> Unit
 ) {
     val queryBusqueda by viewModel.queryBusqueda.collectAsStateWithLifecycle()
@@ -43,8 +43,10 @@ fun PantallaListaProductos(
             })
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAgregarProducto) {
-                Icon(Icons.Default.Add, contentDescription = "Agregar producto")
+            if (onAgregarProducto != null) {
+                FloatingActionButton(onClick = onAgregarProducto) {
+                    Icon(Icons.Default.Add, contentDescription = "Agregar producto")
+                }
             }
         }
     ) { padding ->

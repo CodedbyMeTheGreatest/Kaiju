@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.kaiju.app.model.Cuenta
 import com.kaiju.app.model.ErroresCuenta
 import com.kaiju.app.model.FormularioCuentaEstado
+import com.kaiju.app.model.Usuario
+import com.kaiju.app.repository.autenticar
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,11 +16,6 @@ class InicioSesionViewModel: ViewModel() {
     private val _estadoFormulario = MutableStateFlow(FormularioCuentaEstado())
 
     val estadoFormulario: StateFlow<FormularioCuentaEstado> = _estadoFormulario.asStateFlow()
-
-    private val _cuentas = MutableStateFlow<List<Cuenta>>(emptyList())
-
-    val cuentas: StateFlow<List<Cuenta>> = _cuentas.asStateFlow()
-
     fun actualizarUsuario(valor: String) = _estadoFormulario.update { it.copy(usuario = valor) }
     fun actualizarContrasenia(valor: String) = _estadoFormulario.update { it.copy(contrasenia = valor) }
 
@@ -36,17 +33,23 @@ class InicioSesionViewModel: ViewModel() {
         return errorUsuario == null && errorContrasenia == null
     }
 
-    fun InicioSesion(): Boolean {
-        if (!validarFormulario()) return false
+    fun InicioSesion(): Usuario? {
+        if (!validarFormulario()) return null
 
         val estado = _estadoFormulario.value
-        val cuenta = Cuenta(
-            usuario = estado.usuario.trim(),
-            contrasenia = estado.contrasenia.trim()
-        )
+        val usuario = autenticar(estado.usuario, estado.contrasenia)
 
-        _cuentas.update { it + cuenta }
+        if(usuario == null) {
+            _estadoFormulario.update {
+                it.copy(errores = ErroresCuenta(
+                    errorUsuario = null,
+                    errorContrasenia = "Usuario o contraseña incorrectos"
+                ))
+            }
+            return null
+        }
+
         _estadoFormulario.value = FormularioCuentaEstado()
-        return true
+        return usuario
     }
 }

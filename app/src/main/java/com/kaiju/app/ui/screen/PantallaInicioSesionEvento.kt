@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,12 +18,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.kaiju.app.model.Usuario
 import com.kaiju.app.viewmodel.InicioSesionViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaInicioSesionEvento(viewModel: InicioSesionViewModel){
+fun PantallaInicioSesionEvento(viewModel: InicioSesionViewModel, onLoginExitoso: (Usuario) -> Unit){
     val estado by viewModel.estadoFormulario.collectAsState()
 
     Scaffold(
@@ -51,13 +55,15 @@ fun PantallaInicioSesionEvento(viewModel: InicioSesionViewModel){
                 value = estado.contrasenia,
                 onValueChange = viewModel::actualizarContrasenia,
                 label = { Text("Contraseña") },
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 isError = estado.errores.errorContrasenia != null,
                 supportingText = { estado.errores.errorContrasenia?.let { Text(it) } },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
             Button(
-                onClick = { viewModel.InicioSesion() },
+                onClick = { viewModel.InicioSesion()?.let(onLoginExitoso) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Iniciar Sesión")

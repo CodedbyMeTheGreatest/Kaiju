@@ -62,6 +62,7 @@ class FormularioMovimientoViewModel(
         return !errores.hayErrores
     }
 
+    fun reiniciarFormulario() { _estado.value = FormularioMovimientoEstado() }
     fun guardarMovimiento(usuario: String): Boolean {
         if (!validarFormulario()) return false
         val estado = _estado.value

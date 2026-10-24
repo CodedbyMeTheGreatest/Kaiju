@@ -47,6 +47,11 @@ fun PantallaMovimiento(
             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
         }
     }
+    LaunchedEffect(tiposPermitidos, estado.tipo) {
+        if (tiposPermitidos.size == 1 && estado.tipo == null) {
+            viewModel.actualizarTipo(tiposPermitidos.first())
+        }
+    }
 
     Scaffold(
         modifier = modifier,
