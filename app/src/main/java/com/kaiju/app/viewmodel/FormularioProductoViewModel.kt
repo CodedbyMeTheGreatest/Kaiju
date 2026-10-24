@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kaiju.app.model.CategoriaProducto
 import com.kaiju.app.model.ErroresProducto
+import com.kaiju.app.model.EstadoBoton
 import com.kaiju.app.model.FormularioProductoEstado
 import com.kaiju.app.model.Producto
 import com.kaiju.app.model.TipoProducto
 import com.kaiju.app.repository.ProductoRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 class FormularioProductoViewModel(private val repositorioProducto: ProductoRepository): ViewModel(){
     private val _estadoFormulario = MutableStateFlow(FormularioProductoEstado())
@@ -26,6 +29,9 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
         started = SharingStarted.Eagerly,
         initialValue = emptyList()
     )
+
+    private val _estadoBoton = MutableStateFlow(EstadoBoton.INACTIVO)
+    val estadoBoton: StateFlow<EstadoBoton> = _estadoBoton.asStateFlow()
 
     fun actualizarCodigo(valor: String) = _estadoFormulario.update { it.copy(codigo = valor) }
 
@@ -45,7 +51,6 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
 
     fun actualizarDetalle(valor: String) = _estadoFormulario.update { it.copy(detalle = valor) }
 
-    // Validaciones
     fun validarFormulario(): Boolean {
         val estado = _estadoFormulario.value
         val listaProductos = productos.value
@@ -83,7 +88,7 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
             else -> null
         }
 
-        val errorDetalle =  if(estado.detalle.isBlank()) "El código es obligatorio"  else null
+        val errorDetalle =  if(estado.detalle.isBlank()) "El detalle es obligatorio"  else null
 
         val nuevosErrores = ErroresProducto(
             errorCodigo = errorCodigo,
@@ -122,8 +127,17 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
         )
 
         viewModelScope.launch {
-            repositorioProducto.guardar(nuevoProducto)
-            _estadoFormulario.value = FormularioProductoEstado()
+            _estadoBoton.value = EstadoBoton.CARGANDO
+            try{
+                delay(800.milliseconds)
+                repositorioProducto.guardar(nuevoProducto)
+                _estadoBoton.value = EstadoBoton.EXITOSO
+                delay(1200.milliseconds)
+                _estadoFormulario.value = FormularioProductoEstado()
+                _estadoBoton.value = EstadoBoton.INACTIVO
+            }catch(e: Exception) {
+                _estadoBoton.value = EstadoBoton.INACTIVO
+            }
         }
 
         return true

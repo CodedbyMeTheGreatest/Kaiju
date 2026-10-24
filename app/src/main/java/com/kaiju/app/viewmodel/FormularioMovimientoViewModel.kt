@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.kaiju.app.model.*
 import com.kaiju.app.repository.MovimientoRepository
 import com.kaiju.app.repository.ProductoRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.time.Duration.Companion.milliseconds
 
 class FormularioMovimientoViewModel(
     private val movimientoRepository: MovimientoRepository, productoRepository: ProductoRepository
@@ -19,6 +21,9 @@ class FormularioMovimientoViewModel(
 
     val productos: StateFlow<List<Producto>> = productoRepository.productos.stateIn(viewModelScope,
         SharingStarted.Eagerly, emptyList())
+
+    private val _estadoBoton = MutableStateFlow(EstadoBoton.INACTIVO)
+    val estadoBoton: StateFlow<EstadoBoton> = _estadoBoton.asStateFlow()
 
     private fun buscarProducto(codigo: String): Producto? = productos.value.find { it.codigo == codigo }
     fun actualizarProducto(codigo: String) = _estado.update { it.copy(codigoProducto = codigo) }
@@ -76,9 +81,20 @@ class FormularioMovimientoViewModel(
          )
         val nuevoStock = calcularNuevoStock(producto.stockActual, tipo, cantidad)
 
-        viewModelScope.launch {movimientoRepository.registrarMovimiento(movimiento,nuevoStock)}
+        viewModelScope.launch {
+            _estadoBoton.value = EstadoBoton.CARGANDO
+            try{
+                delay(800.milliseconds)
+                movimientoRepository.registrarMovimiento(movimiento,nuevoStock)
+                _estadoBoton.value = EstadoBoton.EXITOSO
+                delay(1200.milliseconds)
+                _estado.value = FormularioMovimientoEstado()
+                _estadoBoton.value = EstadoBoton.INACTIVO
+            }catch (e: Exception){
+                _estadoBoton.value = EstadoBoton.INACTIVO
+            }
+        }
 
-        _estado.value = FormularioMovimientoEstado()
         return true
     }
 }

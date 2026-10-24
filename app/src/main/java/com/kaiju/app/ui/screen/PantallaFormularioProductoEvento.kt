@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -19,16 +18,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kaiju.app.model.CategoriaProducto
+import com.kaiju.app.model.EstadoBoton
 import com.kaiju.app.model.TipoProducto
+import com.kaiju.app.ui.components.BotonGuardarAnimado
 import com.kaiju.app.viewmodel.FormularioProductoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,7 +41,14 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
     val estado by viewModel.estadoFormulario.collectAsState()
     var menuCategoria by remember { mutableStateOf(false) }
     var menuTipo by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    val estadoBoton by viewModel.estadoBoton.collectAsState()
 
+    LaunchedEffect(estadoBoton) {
+        if (estadoBoton == EstadoBoton.EXITOSO ) {
+            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+        }
+    }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Agregar Producto") }) }
@@ -191,12 +202,16 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel){
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
-            Button(
-                onClick = {viewModel.guardarProducto()},
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Guardar Producto")
-            }
+            BotonGuardarAnimado(
+                estado = estadoBoton,
+                onClick = {
+                    val guardado = viewModel.guardarProducto()
+                    if(!guardado){
+                        haptic.performHapticFeedback(HapticFeedbackType.Reject)
+                    }
+                },
+                txtEjemplar = "Producto"
+            )
         }
     }
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
@@ -15,9 +14,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.kaiju.app.model.EstadoBoton
 import com.kaiju.app.model.TipoMovimiento
+import com.kaiju.app.ui.components.BotonGuardarAnimado
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
 import kotlinx.coroutines.launch
 
@@ -34,8 +37,16 @@ fun PantallaMovimiento(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val haptic = LocalHapticFeedback.current
+    val estadoBoton by viewModel.estadoBoton.collectAsState()
 
     val productoSeleccionado = productos.find { it.codigo == estado.codigoProducto }
+
+    LaunchedEffect(estadoBoton) {
+        if (estadoBoton == EstadoBoton.EXITOSO ) {
+            haptic.performHapticFeedback(HapticFeedbackType.Confirm)
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -107,20 +118,18 @@ fun PantallaMovimiento(
             )
 
             Spacer(Modifier.height(8.dp))
-
-            Button(
+            BotonGuardarAnimado(
+                estado = estadoBoton,
                 onClick = {
                     val guardado = viewModel.guardarMovimiento(nombreUsuario)
                     if (guardado) {
                         scope.launch { snackbarHostState.showSnackbar("Movimiento registrado") }
+                    }else{
+                        haptic.performHapticFeedback(HapticFeedbackType.Reject)
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Check, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Registrar movimiento")
-            }
+                txtEjemplar = "Movimiento"
+            )
         }
     }
 }
