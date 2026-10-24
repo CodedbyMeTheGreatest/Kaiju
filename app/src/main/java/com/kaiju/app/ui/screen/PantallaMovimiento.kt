@@ -15,12 +15,14 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.kaiju.app.model.EstadoBoton
 import com.kaiju.app.model.TipoMovimiento
 import com.kaiju.app.ui.components.BotonGuardarAnimado
+import com.kaiju.app.ui.components.NotificadorStock
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
 import kotlinx.coroutines.launch
 
@@ -29,6 +31,7 @@ fun PantallaMovimiento(
     viewModel: FormularioMovimientoViewModel,
     nombreUsuario: String,
     tiposPermitidos: List<TipoMovimiento> = TipoMovimiento.values().toList(),
+    notificarAlertas: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val estado by viewModel.estado.collectAsState()
@@ -42,6 +45,8 @@ fun PantallaMovimiento(
 
     val productoSeleccionado = productos.find { it.codigo == estado.codigoProducto }
 
+    val context = LocalContext.current
+
     LaunchedEffect(estadoBoton) {
         if (estadoBoton == EstadoBoton.EXITOSO ) {
             haptic.performHapticFeedback(HapticFeedbackType.Confirm)
@@ -50,6 +55,13 @@ fun PantallaMovimiento(
     LaunchedEffect(tiposPermitidos, estado.tipo) {
         if (tiposPermitidos.size == 1 && estado.tipo == null) {
             viewModel.actualizarTipo(tiposPermitidos.first())
+        }
+    }
+    LaunchedEffect(notificarAlertas) {
+        if (notificarAlertas) {
+            viewModel.alertasGeneradas.collect { producto ->
+                NotificadorStock.notificarStockBajo(context, producto)
+            }
         }
     }
 

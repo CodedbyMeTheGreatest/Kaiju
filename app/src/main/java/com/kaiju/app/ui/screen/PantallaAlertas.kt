@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.kaiju.app.ui.components.AvisoNotificaciones
 import com.kaiju.app.ui.components.TarjetaAlerta
 import com.kaiju.app.viewmodel.AlertasViewModel
 
@@ -23,21 +24,24 @@ fun PantallaAlertas(viewModel: AlertasViewModel) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Alertas de stock") }) }
     ) { padding ->
-        if (productos.isEmpty()) {
-            // Estado vacío: se explica en vez de dejar la pantalla en blanco
-            Column(
-                modifier = Modifier.padding(padding).fillMaxSize().padding(32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(Icons.Default.CheckCircle, contentDescription = null)
-                Spacer(Modifier.height(8.dp))
-                Text("No hay productos con stock bajo", style = MaterialTheme.typography.titleMedium)
-            }
-        } else {
-            LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
-                items(productos, key = { it.codigo }) { producto ->
-                    TarjetaAlerta(producto)
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            AvisoNotificaciones()
+
+            if (productos.isEmpty()) {
+                Column(
+                    modifier = Modifier.padding(padding).fillMaxSize().padding(32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null)
+                    Spacer(Modifier.height(8.dp))
+                    Text("No hay productos con stock bajo", style = MaterialTheme.typography.titleMedium)
+                }
+            } else {
+                LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
+                    items(productos, key = { it.codigo }) { producto ->
+                        TarjetaAlerta(producto)
+                    }
                 }
             }
         }

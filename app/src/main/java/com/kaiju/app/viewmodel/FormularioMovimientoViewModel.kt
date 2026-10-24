@@ -16,6 +16,8 @@ class FormularioMovimientoViewModel(
     private val movimientoRepository: MovimientoRepository, productoRepository: ProductoRepository
 ) : ViewModel() {
 
+    private val _alertasGeneradas = MutableSharedFlow<Producto>(extraBufferCapacity = 1)
+    val alertasGeneradas: SharedFlow<Producto> = _alertasGeneradas.asSharedFlow()
     private val _estado = MutableStateFlow(FormularioMovimientoEstado())
     val estado: StateFlow<FormularioMovimientoEstado> = _estado.asStateFlow()
 
@@ -87,6 +89,9 @@ class FormularioMovimientoViewModel(
             try{
                 delay(800.milliseconds)
                 movimientoRepository.registrarMovimiento(movimiento,nuevoStock)
+                if (nuevoStock <= producto.stockMinimo && nuevoStock < producto.stockActual) {
+                    _alertasGeneradas.tryEmit(producto.copy(stockActual = nuevoStock))
+                }
                 _estadoBoton.value = EstadoBoton.EXITOSO
                 delay(1200.milliseconds)
                 _estado.value = FormularioMovimientoEstado()

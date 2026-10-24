@@ -10,6 +10,7 @@ import com.kaiju.app.model.Movimiento
 import com.kaiju.app.model.Producto
 import com.kaiju.app.model.TipoMovimiento
 import com.kaiju.app.model.TipoProducto
+import com.kaiju.app.ui.components.NotificadorStock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -26,6 +27,7 @@ class KaijuApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        NotificadorStock.crearCanal(this)
         applicationScope.launch {
             inicializarDatosSiEsNecesario()
         }

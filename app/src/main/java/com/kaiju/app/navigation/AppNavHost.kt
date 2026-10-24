@@ -3,7 +3,6 @@ package com.kaiju.app.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Warning
@@ -65,7 +64,6 @@ fun AppNavHost(
     val navController = rememberNavController()
     val context = LocalContext.current
 
-    // Ruta de la pantalla que se está mostrando ahora (para marcar el menú).
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route
 
@@ -163,7 +161,8 @@ fun AppNavHost(
                 PantallaMovimiento(
                 viewModel = viewModelFormularioMovimiento,
                 nombreUsuario = u.nombre,
-                tiposPermitidos = u.rol.tiposMovimientoPermitidos()
+                tiposPermitidos = u.rol.tiposMovimientoPermitidos(),
+                notificarAlertas = u.rol.puedeVerAlertas()
                 )
             }
             composable(
