@@ -6,14 +6,21 @@ import com.kaiju.app.remote.PokemonDto
 
 class PokemonRepository(private val api: PokeApi) {
 
+    private val Fichas = mutableMapOf<String, PokemonDto>()
 
-
+    @Throws(Exception::class) // Avisamos que puede lanzar error de conexión
     suspend fun buscar(nombre: String): PokemonDto? {
-        return try {
-            val respuesta = api.obtenerPokemon(nombre.lowercase().trim())
-            if (respuesta.isSuccessful) respuesta.body() else null
-        } catch (e: Exception) {
-            null
+        val clave = nombre.lowercase().trim()
+        Fichas[clave]?.let { return it }
+
+        val respuesta = api.obtenerPokemon(clave)
+
+        return if (respuesta.isSuccessful && respuesta.body() != null) {
+            val dto = respuesta.body()!!
+            Fichas[clave] = dto
+            dto
+        } else {
+            null // Ignoramos si no se encontró
         }
     }
     suspend fun detectarEnTexto(texto: String): PokemonCoincidencia? {

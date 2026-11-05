@@ -2,14 +2,19 @@ package com.kaiju.app.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -87,9 +92,34 @@ fun PantallaDetalleProducto(
                         TarjetaFichaProducto(producto = producto)
                     }
 
-                    estado.pokemon?.let { pokemonDto ->
+                    if (estado.errorConexionPokemon) {
                         item {
-                            TarjetaFichaPokemon(pokemon = pokemonDto)
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "No se pudo conectar a la PokéAPI.",
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(onClick = { viewModel.reintentarPokemon() }) {
+                                        Text("Reintentar Conexión")
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    } else {
+                        estado.pokemon?.let { pokemonDto ->
+                            item {
+                                TarjetaFichaPokemon(pokemon = pokemonDto)
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
                         }
                     }
 

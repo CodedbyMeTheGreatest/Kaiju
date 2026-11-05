@@ -22,27 +22,39 @@ class DetalleProductoViewModel(
     movimientoRepository: MovimientoRepository,
     pokemonRepository: PokemonRepository
 ): ViewModel() {
-
-    private val _pokemonDto = MutableStateFlow<PokemonDto?>(null)
-    val pokemonDto = _pokemonDto.asStateFlow()
+    private val _triggerReintento = MutableStateFlow(0)
 
     val estadoDetalleProducto: StateFlow<DetalleProductoEstado> = combine(productoRepository.obtenerPorCodigo(codigoProducto),
-        movimientoRepository.obtenerPorProducto(codigoProducto))
-    { producto, movimientos ->
+        movimientoRepository.obtenerPorProducto(codigoProducto),
+        _triggerReintento
+    )
+    { producto, movimientos, _ ->
 
-        val pokemon = producto?.pokemonNombre?.let { nombre ->
-            pokemonRepository.buscar(nombre)
+        var pokemon: PokemonDto? = null
+        var errorConexion = false
+
+        producto?.pokemonNombre?.let { nombre ->
+            try {
+                pokemon = pokemonRepository.buscar(nombre)
+            } catch (e: Exception) {
+                errorConexion = true
+            }
         }
 
         DetalleProductoEstado(
             cargando = false,
             producto = producto,
             movimientos = movimientos,
-            pokemon = pokemon
+            pokemon = pokemon,
+            errorConexionPokemon = errorConexion
         )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = DetalleProductoEstado(cargando = true)
     )
+
+    fun reintentarPokemon() {
+        _triggerReintento.value += 1
+    }
 }
