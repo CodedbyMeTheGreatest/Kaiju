@@ -50,3 +50,18 @@ Trello: Tablero de organización de tareas del equipo.
 - https://trello.com/b/xTEVOLtZ/kaijugrupox
 
 
+# Api Seleccionada
+- PokeAPI
+- Descripcion: Mediante este sitio web, podrás consultar información sobre Pokémon, sus movimientos, habilidades, tipos, grupos de huevos y mucho más.
+- URL: https://pokeapi.co/
+- Endpoint (ejemplo): https://pokeapi.co/api/v2/pokemon/ditto
+
+## Como se accede
+
+Al ingresar los datos de un producto a registrar, si se encuentra el nombre de un Pokemon en los apartados 'Nombre', 'Descripción' o 'Detalle', al registrarse el producto se mostrará un mensaje de exito con la imagen de un Pokemon
+
+<img width="324" height="710" alt="imagen" src="https://github.com/user-attachments/assets/61c755ba-3ea3-4fe6-986b-3bd138c4171e" />
+
+Al aparecer esa pantalla, uno puede dirigirse al detalle del producto, y solo los productos con nombres de Pokemon, tendran una ficha especial abajo de la informacion del producto, con informacion perteneciente al Pokemon nombrado. 
+
+<img width="316" height="706" alt="imagen" src="https://github.com/user-attachments/assets/9edbb54f-23a5-409b-8e86-263e09fb42df" />
