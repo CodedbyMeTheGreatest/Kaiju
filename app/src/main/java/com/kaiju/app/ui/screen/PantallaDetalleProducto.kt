@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.kaiju.app.ui.components.TarjetaFichaPokemon
 import com.kaiju.app.ui.components.TarjetaFichaProducto
 import com.kaiju.app.ui.components.TarjetaMovimiento
 
@@ -84,6 +85,12 @@ fun PantallaDetalleProducto(
                 ) {
                     item {
                         TarjetaFichaProducto(producto = producto)
+                    }
+
+                    estado.pokemon?.let { pokemonDto ->
+                        item {
+                            TarjetaFichaPokemon(pokemon = pokemonDto)
+                        }
                     }
 
                     item {

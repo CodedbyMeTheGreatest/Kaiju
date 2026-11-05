@@ -5,7 +5,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = "products",
+    tableName = "productos",
     indices = [Index(value = ["codigo"], unique = true)]
 )
 data class Producto (
@@ -19,5 +19,6 @@ data class Producto (
     val precio:Int,
     val stockActual:Int,
     val stockMinimo: Int,
-    val detalle: String
+    val detalle: String,
+    val pokemonNombre: String? = null
 )

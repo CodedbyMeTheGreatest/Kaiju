@@ -6,8 +6,10 @@ import com.kaiju.app.model.CategoriaProducto
 import com.kaiju.app.model.ErroresProducto
 import com.kaiju.app.model.EstadoBoton
 import com.kaiju.app.model.FormularioProductoEstado
+import com.kaiju.app.model.PokemonCoincidencia
 import com.kaiju.app.model.Producto
 import com.kaiju.app.model.TipoProducto
+import com.kaiju.app.repository.PokemonRepository
 import com.kaiju.app.repository.ProductoRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +21,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
 
-class FormularioProductoViewModel(private val repositorioProducto: ProductoRepository): ViewModel(){
+class FormularioProductoViewModel(
+    private val repositorioProducto: ProductoRepository,
+    private val repositorioPokemon: PokemonRepository
+): ViewModel(){
+
+    private val _pokemonEasterEgg = MutableStateFlow<PokemonCoincidencia?>(null)
+    val pokemonEasterEgg = _pokemonEasterEgg.asStateFlow()
     private val _estadoFormulario = MutableStateFlow(FormularioProductoEstado())
 
     val estadoFormulario: StateFlow<FormularioProductoEstado> = _estadoFormulario.asStateFlow()
@@ -109,6 +117,7 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
         return !nuevosErrores.hayErrores
     }
 
+
     fun guardarProducto(): Boolean {
         if (!validarFormulario()) return false
 
@@ -130,16 +139,34 @@ class FormularioProductoViewModel(private val repositorioProducto: ProductoRepos
             _estadoBoton.value = EstadoBoton.CARGANDO
             try{
                 delay(800.milliseconds)
-                repositorioProducto.guardar(nuevoProducto)
-                _estadoBoton.value = EstadoBoton.EXITOSO
+
+                val pokemonDetectado = repositorioPokemon.detectarEnTexto(nuevoProducto.nombre)
+                    ?: repositorioPokemon.detectarEnTexto(nuevoProducto.descripcion)
+                    ?: repositorioPokemon.detectarEnTexto(nuevoProducto.detalle)
+
+                val productoAInsertar = nuevoProducto.copy(pokemonNombre = pokemonDetectado?.nombre)
+
+                repositorioProducto.guardar(productoAInsertar)
+
+                if (pokemonDetectado != null) {
+                    _estadoBoton.value = EstadoBoton.INACTIVO
+                    _pokemonEasterEgg.value = pokemonDetectado
+                } else {
+                    _estadoBoton.value = EstadoBoton.EXITOSO
+                    delay(1200.milliseconds)
+                    _estadoBoton.value = EstadoBoton.INACTIVO
+                }
+
                 delay(1200.milliseconds)
                 _estadoFormulario.value = FormularioProductoEstado()
-                _estadoBoton.value = EstadoBoton.INACTIVO
             }catch(e: Exception) {
                 _estadoBoton.value = EstadoBoton.INACTIVO
             }
         }
 
         return true
+    }
+    fun cerrarEasterEgg() {
+        _pokemonEasterEgg.value = null
     }
 }

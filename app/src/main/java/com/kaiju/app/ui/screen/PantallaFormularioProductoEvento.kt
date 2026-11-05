@@ -37,12 +37,14 @@ import com.kaiju.app.model.CategoriaProducto
 import com.kaiju.app.model.EstadoBoton
 import com.kaiju.app.model.TipoProducto
 import com.kaiju.app.ui.components.BotonGuardarAnimado
+import com.kaiju.app.ui.components.PokemonEasterEgg
 import com.kaiju.app.viewmodel.FormularioProductoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel, onVolver: () -> Unit){
     val estado by viewModel.estadoFormulario.collectAsState()
+    val pokemonEasterEgg by viewModel.pokemonEasterEgg.collectAsState()
     var menuCategoria by remember { mutableStateOf(false) }
     var menuTipo by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
@@ -227,5 +229,12 @@ fun PantallaFormularioProductoEvento(viewModel: FormularioProductoViewModel, onV
                 txtEjemplar = "Producto"
             )
         }
+    }
+
+    pokemonEasterEgg?.let { pokemon ->
+        PokemonEasterEgg(
+            pokemon = pokemon, // Le pasas el objeto completo
+            onDismiss = { viewModel.cerrarEasterEgg() }
+        )
     }
 }
