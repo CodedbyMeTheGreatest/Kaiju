@@ -18,3 +18,6 @@ fun autenticar(usuario: String, contrasenia: String): Usuario? =
     usuariosDePrueba.firstOrNull { (cuenta, _) ->
         cuenta.usuario.equals(usuario, ignoreCase = true) && cuenta.contrasenia == contrasenia
     }?.second
+
+fun usuarioPorId(id: String): Usuario? =
+    usuariosDePrueba.firstOrNull { (_, usuario) -> usuario.id == id }?.second

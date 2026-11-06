@@ -1,5 +1,6 @@
 package com.kaiju.app.navigation
 
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,11 +47,12 @@ import com.kaiju.app.viewmodel.InicioSesionViewModel
 import com.kaiju.app.viewmodel.ListaProductosViewModel
 import com.kaiju.app.viewmodel.ListaProductosViewModelFactory
 import com.kaiju.app.viewmodel.SesionViewModel
+import com.kaiju.app.viewmodel.SesionViewModelFactory
 
 @Composable
 fun AppNavHost(
     viewModelInicioSesion: InicioSesionViewModel = viewModel(),
-    sesion: SesionViewModel = viewModel(),
+    sesion: SesionViewModel = viewModel(factory = SesionViewModelFactory(LocalContext.current)),
     viewModelFormularioProducto: FormularioProductoViewModel = viewModel(factory = FormularioProductoViewModelFactory(
                    LocalContext.current)),
     viewModelFormularioMovimiento: FormularioMovimientoViewModel =
@@ -69,6 +72,10 @@ fun AppNavHost(
 
     val usuario by sesion.usuarioActivo.collectAsState()
     val rol = usuario?.rol
+
+    val destinoInicial = remember {
+        if (sesion.usuarioActivo.value != null) Rutas.Catalogo.ruta else Rutas.InicioSesion.ruta
+    }
 
     LaunchedEffect(usuario, rutaActual) {
         if (usuario == null && rutaActual != null && rutaActual != Rutas.InicioSesion.ruta) {
@@ -133,7 +140,7 @@ fun AppNavHost(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Rutas.InicioSesion.ruta,
+            startDestination = destinoInicial,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Rutas.InicioSesion.ruta) {
