@@ -1,55 +1,70 @@
 package com.kaiju.app.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.kaiju.app.model.Cuenta
+import androidx.lifecycle.viewModelScope
 import com.kaiju.app.model.ErroresCuenta
 import com.kaiju.app.model.FormularioCuentaEstado
-import com.kaiju.app.model.Usuario
-import com.kaiju.app.repository.autenticar
+import com.kaiju.app.model.LoginRequest
+import com.kaiju.app.model.UsuarioResumen
+import com.kaiju.app.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class InicioSesionViewModel: ViewModel() {
+class InicioSesionViewModel(
+    private val repository: UsuarioRepository
+): ViewModel()  {
 
     private val _estadoFormulario = MutableStateFlow(FormularioCuentaEstado())
 
     val estadoFormulario: StateFlow<FormularioCuentaEstado> = _estadoFormulario.asStateFlow()
-    fun actualizarUsuario(valor: String) = _estadoFormulario.update { it.copy(usuario = valor) }
+
+    private val _cargando = MutableStateFlow(false)
+    val cargando: StateFlow<Boolean> = _cargando.asStateFlow()
+
+    fun actualizarEmail(valor: String) = _estadoFormulario.update { it.copy(email = valor) }
     fun actualizarContrasenia(valor: String) = _estadoFormulario.update { it.copy(contrasenia = valor) }
 
     fun validarFormulario(): Boolean {
         val estado = _estadoFormulario.value
 
-        val errorUsuario = if (estado.usuario.isBlank()) "El nombre de usuario es obligatorio" else null
+        val errorEmail = if (estado.email.isBlank()) "El correo es obligatorio" else null
 
         val errorContrasenia= if (estado.contrasenia.isBlank()) "La contraseña es obligatoria" else null
 
         _estadoFormulario.update {
-            it.copy(errores = ErroresCuenta(errorUsuario, errorContrasenia))
+            it.copy(errores = ErroresCuenta(errorEmail, errorContrasenia))
         }
 
-        return errorUsuario == null && errorContrasenia == null
+        return errorEmail == null && errorContrasenia == null
     }
 
-    fun InicioSesion(): Usuario? {
-        if (!validarFormulario()) return null
+    fun InicioSesion(onSuccess: (String, UsuarioResumen) -> Unit) {
+        if (!validarFormulario()) return
 
+        _cargando.value = true
         val estado = _estadoFormulario.value
-        val usuario = autenticar(estado.usuario, estado.contrasenia)
 
-        if(usuario == null) {
-            _estadoFormulario.update {
-                it.copy(errores = ErroresCuenta(
-                    errorUsuario = null,
-                    errorContrasenia = "Usuario o contraseña incorrectos"
-                ))
+        viewModelScope.launch {
+            val request = LoginRequest(email = estado.email, password = estado.contrasenia)
+            val resultado = repository.login(request)
+
+            resultado.onSuccess { response ->
+                _cargando.value = false
+                _estadoFormulario.value = FormularioCuentaEstado()
+                onSuccess(response.token, response.usuario)
+            }.onFailure {
+                _cargando.value = false
+                _estadoFormulario.update {
+                    it.copy(errores = ErroresCuenta(
+                        errorEmail = null,
+                        errorContrasenia = "Credenciales incorrectas o Error en el servidor"
+                    ))
+                }
+
             }
-            return null
         }
-
-        _estadoFormulario.value = FormularioCuentaEstado()
-        return usuario
     }
 }
