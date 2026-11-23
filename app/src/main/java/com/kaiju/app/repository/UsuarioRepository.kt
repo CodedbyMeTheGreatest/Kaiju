@@ -33,6 +33,19 @@ class UsuarioRepository(private val api: UsuarioApi) {
         }
     }
 
+    suspend fun obtenerUsuario(token: String, id: Int): Result<Usuario> {
+        return try {
+            val response = api.obtenerUsuario("Bearer $token", id)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("No se encontro al usuario con ID: ${id}: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun crearUsuario(usuario: Usuario): Result<Usuario> {
         return try {
             val response = api.registrarUsuario(usuario)
@@ -45,6 +58,21 @@ class UsuarioRepository(private val api: UsuarioApi) {
             Result.failure(e)
         }
     }
+
+    suspend fun actualizarUsuario(token: String, id: Int, usuario: Usuario): Result<Usuario> {
+        return try {
+            val response = api.actualizarUsuario(token, id, usuario)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                Result.failure(Exception("Error al actualizar usuario."))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
 
     suspend fun eliminarUsuario(token: String, id: Int): Result<Unit> {
         return try {

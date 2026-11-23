@@ -10,6 +10,6 @@ data class Usuario (
     val email: String,
     val password: String? = null,
     val tipo: RolUsuario,
-    val fecha_nacimiento: String,
+    val fechaNacimiento: String,
     val activo: Boolean = true
 )
