@@ -70,7 +70,7 @@ class ListaUsuariosViewModel(private val repository: UsuarioRepository) : ViewMo
             val resultado = repository.listarUsuarios(token)
 
             resultado.onSuccess { listaRecibida ->
-                _usuariosTotales.value = listaRecibida
+                _usuariosTotales.value = listaRecibida.filter { it.activo && it.tipo != null }
             }.onFailure { error ->
                 _mensajeError.value = error.message ?: "Error desconocido al cargar usuarios"
             }

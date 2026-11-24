@@ -16,8 +16,9 @@ interface UsuarioApi {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @POST("auth/registro")
-    suspend fun registrarUsuario(@Body usuario: Usuario): Response<Usuario>
+    @POST("usuarios")
+    suspend fun crearUsuario(@Header("Authorization") token: String, @Body usuario: Usuario
+    ): Response<Usuario>
 
     @GET("usuarios")
     suspend fun listarUsuarios(@Header("Authorization") token: String

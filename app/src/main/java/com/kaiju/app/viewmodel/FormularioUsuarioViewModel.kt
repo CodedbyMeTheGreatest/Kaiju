@@ -53,7 +53,7 @@ class FormularioUsuarioViewModel(
                     email = usuario.email,
                     password = "",
                     tipo = usuario.tipo,
-                    fechaNacimiento = usuario.fechaNacimiento,
+                    fechaNacimiento = usuario.fechaNacimiento?.take(10)?:"",
                     activo = usuario.activo
                 )
             }.onFailure { error ->
@@ -65,7 +65,11 @@ class FormularioUsuarioViewModel(
     fun validarFormulario(): Boolean {
         val estado = _estadoFormulario.value
 
-        val errorRun = if (estado.run.isBlank()) "El RUN es obligatorio" else null
+        val errorRun = when {estado.run.isBlank() -> "El RUN es obligatorio"
+            !Regex("^\\d{6,8}[0-9Kk]$").matches(estado.run.trim()) ->
+                "RUN sin puntos ni guion (ej: 12345678K)"
+            else -> null
+        }
         val errorNombre = if (estado.nombre.isBlank()) "El nombre es obligatorio" else null
         val errorApellidos = if (estado.apellidos.isBlank()) "Los apellidos son obligatorios" else null
 
@@ -77,12 +81,17 @@ class FormularioUsuarioViewModel(
 
         val errorPassword = when {
             !estado.esEdicion && estado.password.isBlank() -> "La contraseña es obligatoria"
-            estado.password.isNotBlank() && estado.password.length > 64 -> "Máximo 64 caracteres"
+            estado.password.isNotBlank() && estado.password.length !in 4..64 -> "Entre 4 y 64 caracteres"
             else -> null
         }
 
         val errorTipo = if (estado.tipo == null) "El rol es obligatorio" else null
-        val errorFecha = if (estado.fechaNacimiento.isBlank()) "La fecha de nacimiento es obligatoria" else null
+        val errorFecha = when{
+            estado.fechaNacimiento.isBlank() -> "La fecha de nacimiento es obligatoria"
+            !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(estado.fechaNacimiento.trim()) ->
+                "Formato AAAA-MM-DD"
+            else -> null
+        }
 
         val nuevosErrores = ErroresUsuario(
             errorRun = errorRun,
@@ -121,7 +130,7 @@ class FormularioUsuarioViewModel(
             val resultado = if (estado.esEdicion) {
                 repository.actualizarUsuario(token, estado.id, usuario)
             } else {
-                repository.crearUsuario(usuario)
+                repository.crearUsuario(token,usuario)
             }
 
             resultado.onSuccess {

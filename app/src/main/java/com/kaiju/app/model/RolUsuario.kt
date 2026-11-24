@@ -7,6 +7,6 @@ enum class RolUsuario {
     ADMINISTRADOR,
     @SerializedName("Vendedor")
     VENDEDOR,
-    @SerializedName("Encargado de inventario")
+    @SerializedName("Encargado")
     ENCARGADO_INVENTARIO
 }

@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -27,31 +28,42 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.kaiju.app.model.puedeGestionarProductos
+import com.kaiju.app.model.puedeGestionarUsuarios
 import com.kaiju.app.model.puedeVerAlertas
 import com.kaiju.app.model.tiposMovimientoPermitidos
 import com.kaiju.app.ui.screen.PantallaAlertas
 import com.kaiju.app.ui.screen.PantallaDetalleProducto
+import com.kaiju.app.ui.screen.PantallaDetalleUsuario
 import com.kaiju.app.ui.screen.PantallaFormularioProductoEvento
+import com.kaiju.app.ui.screen.PantallaFormularioUsuario
 import com.kaiju.app.ui.screen.PantallaInicioSesionEvento
 import com.kaiju.app.ui.screen.PantallaListaProductos
+import com.kaiju.app.ui.screen.PantallaListaUsuarios
 import com.kaiju.app.ui.screen.PantallaMovimiento
 import com.kaiju.app.viewmodel.AlertasViewModel
 import com.kaiju.app.viewmodel.AlertasViewModelFactory
 import com.kaiju.app.viewmodel.DetalleProductoViewModel
 import com.kaiju.app.viewmodel.DetalleProductoViewModelFactory
+import com.kaiju.app.viewmodel.DetalleUsuarioViewModel
+import com.kaiju.app.viewmodel.DetalleUsuarioViewModelFactory
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModel
 import com.kaiju.app.viewmodel.FormularioMovimientoViewModelFactory
 import com.kaiju.app.viewmodel.FormularioProductoViewModel
 import com.kaiju.app.viewmodel.FormularioProductoViewModelFactory
+import com.kaiju.app.viewmodel.FormularioUsuarioViewModel
+import com.kaiju.app.viewmodel.FormularioUsuarioViewModelFactory
 import com.kaiju.app.viewmodel.InicioSesionViewModel
+import com.kaiju.app.viewmodel.InicioSesionViewModelFactory
 import com.kaiju.app.viewmodel.ListaProductosViewModel
 import com.kaiju.app.viewmodel.ListaProductosViewModelFactory
+import com.kaiju.app.viewmodel.ListaUsuariosViewModel
+import com.kaiju.app.viewmodel.ListaUsuariosViewModelFactory
 import com.kaiju.app.viewmodel.SesionViewModel
 import com.kaiju.app.viewmodel.SesionViewModelFactory
 
 @Composable
 fun AppNavHost(
-    viewModelInicioSesion: InicioSesionViewModel = viewModel(),
+    viewModelInicioSesion: InicioSesionViewModel = viewModel(factory = InicioSesionViewModelFactory(LocalContext.current)),
     sesion: SesionViewModel = viewModel(factory = SesionViewModelFactory(LocalContext.current)),
     viewModelFormularioProducto: FormularioProductoViewModel = viewModel(factory = FormularioProductoViewModelFactory(
                    LocalContext.current)),
@@ -70,8 +82,9 @@ fun AppNavHost(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route
 
+    val token by sesion.token.collectAsState()
     val usuario by sesion.usuarioActivo.collectAsState()
-    val rol = usuario?.rol
+    val rol = usuario?.tipo
 
     val destinoInicial = remember {
         if (sesion.usuarioActivo.value != null) Rutas.Catalogo.ruta else Rutas.InicioSesion.ruta
@@ -96,7 +109,8 @@ fun AppNavHost(
     val rutasConBarras = listOf(
         Rutas.Catalogo.ruta,
         Rutas.GestionMovimiento.ruta,
-        Rutas.Alertas.ruta
+        Rutas.Alertas.ruta,
+        Rutas.ListaUsuarios.ruta
     )
     val mostrarBarra = rutaActual in rutasConBarras
 
@@ -124,6 +138,14 @@ fun AppNavHost(
                             label = { Text("Alertas") }
                         )
                     }
+                    if (rol.puedeGestionarUsuarios()) {
+                        NavigationBarItem(
+                            selected = rutaActual == Rutas.ListaUsuarios.ruta,
+                            onClick = { irAPestana(Rutas.ListaUsuarios.ruta) },
+                            icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                            label = { Text("Usuarios") }
+                        )
+                    }
                     NavigationBarItem(
                         selected = false,
                         onClick = {
@@ -146,8 +168,8 @@ fun AppNavHost(
             composable(Rutas.InicioSesion.ruta) {
                 PantallaInicioSesionEvento(
                     viewModel = viewModelInicioSesion,
-                    onLoginExitoso = { u ->
-                        sesion.iniciar(u)
+                    onLoginExitoso = { tokenJwt, u ->
+                        sesion.iniciar(tokenJwt, u)
                         navController.navigate(Rutas.Catalogo.ruta) {
                             popUpTo(Rutas.InicioSesion.ruta) { inclusive = true }
                         }
@@ -175,8 +197,8 @@ fun AppNavHost(
                 PantallaMovimiento(
                 viewModel = viewModelFormularioMovimiento,
                 nombreUsuario = u.nombre,
-                tiposPermitidos = u.rol.tiposMovimientoPermitidos(),
-                notificarAlertas = u.rol.puedeVerAlertas()
+                tiposPermitidos = u.tipo.tiposMovimientoPermitidos(),
+                notificarAlertas = u.tipo.puedeVerAlertas()
                 )
             }
             composable(
@@ -193,6 +215,51 @@ fun AppNavHost(
             composable(Rutas.Alertas.ruta) {
                 if (rol?.puedeVerAlertas() == true){
                     PantallaAlertas(viewModel = viewModelAlertas)
+                }
+            }
+            composable(Rutas.ListaUsuarios.ruta) {
+                val tokenActual = token ?: return@composable
+                if (rol?.puedeGestionarUsuarios() == true) {
+                    val listaVm: ListaUsuariosViewModel = viewModel(factory = ListaUsuariosViewModelFactory())
+                    PantallaListaUsuarios(
+                        viewModel = listaVm,
+                        token = tokenActual,
+                        onNavegarAAgregar = { navController.navigate(Rutas.FormularioUsuario.crearRuta()) },
+                        onNavegarADetalle = { id -> navController.navigate(Rutas.DetalleUsuario.crearRuta(id)) }
+                    )
+                }
+            }
+            composable(
+                route = Rutas.DetalleUsuario.ruta,
+                arguments = listOf(navArgument("idUsuario") { type = NavType.IntType })
+            ) { backStack ->
+                val tokenActual = token ?: return@composable
+                val id = backStack.arguments?.getInt("idUsuario") ?: return@composable
+                if (rol?.puedeGestionarUsuarios() == true) {
+                    val detalleVm: DetalleUsuarioViewModel = viewModel(factory = DetalleUsuarioViewModelFactory())
+                    PantallaDetalleUsuario(
+                        viewModel = detalleVm,
+                        token = tokenActual,
+                        idUsuario = id,
+                        onEditar = { navController.navigate(Rutas.FormularioUsuario.crearRuta(it)) },
+                        onVolver = { navController.popBackStack() }
+                    )
+                }
+            }
+            composable(
+                route = Rutas.FormularioUsuario.ruta,
+                arguments = listOf(navArgument("id") { type = NavType.IntType; defaultValue = 0 })
+            ) { backStack ->
+                val tokenActual = token ?: return@composable
+                val id = backStack.arguments?.getInt("id") ?: 0
+                if (rol?.puedeGestionarUsuarios() == true) {
+                    val formVm: FormularioUsuarioViewModel = viewModel(factory = FormularioUsuarioViewModelFactory())
+                    PantallaFormularioUsuario(
+                        viewModel = formVm,
+                        token = tokenActual,
+                        idUsuario = id,
+                        onVolver = { navController.popBackStack() }
+                    )
                 }
             }
         }

@@ -1,10 +1,8 @@
 package com.kaiju.app.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.kaiju.app.model.Usuario
 import com.kaiju.app.model.UsuarioResumen
 import com.kaiju.app.repository.AlmacenSesion
-import com.kaiju.app.repository.usuarioPorId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

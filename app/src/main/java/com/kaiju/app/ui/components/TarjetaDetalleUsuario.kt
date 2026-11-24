@@ -90,7 +90,7 @@ fun TarjetaDetalleUsuario(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilaDetalle(etiqueta = "RUN", valor = usuario.run)
                 FilaDetalle(etiqueta = "Correo", valor = usuario.email)
-                FilaDetalle(etiqueta = "Fecha nac.", valor = usuario.fechaNacimiento)
+                FilaDetalle(etiqueta = "Fecha nac.", valor = usuario.fechaNacimiento?.take(10) ?: "Sin registrar")
             }
 
             Spacer(modifier = Modifier.height(24.dp))
