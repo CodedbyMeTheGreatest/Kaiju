@@ -1,6 +1,5 @@
 package com.kaiju.app.model
 
-import java.time.LocalDateTime
 
 data class FormularioMovimientoEstado (
     val codigoProducto: String = "",
