@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import kotlin.time.Duration.Companion.milliseconds
 
 class FormularioUsuarioViewModel(
@@ -28,6 +30,16 @@ class FormularioUsuarioViewModel(
 
     private val _mensajeError = MutableStateFlow<String?>(null)
     val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
+
+    private val DOMINIOS_VALIDOS = listOf("duoc.cl", "profesor.duoc.cl", "gmail.com")
+
+    private fun errorDeFecha(texto: String): String? =
+        try {
+            if (LocalDate.parse(texto.trim()).isAfter(LocalDate.now())) "La fecha no puede ser futura"
+            else null
+        } catch (e: DateTimeParseException) {
+            "Fecha inválida (AAAA-MM-DD)"
+        }
 
     fun actualizarRun(valor: String) = _estadoFormulario.update { it.copy(run = valor) }
     fun actualizarNombre(valor: String) = _estadoFormulario.update { it.copy(nombre = valor) }
@@ -76,6 +88,8 @@ class FormularioUsuarioViewModel(
         val errorEmail = when {
             estado.email.isBlank() -> "El correo es obligatorio"
             !estado.email.contains("@") -> "Formato de correo inválido"
+            estado.email.trim().substringAfter("@").lowercase() !in DOMINIOS_VALIDOS ->
+                "Dominio no permitido. Usa: ${DOMINIOS_VALIDOS.joinToString { "@$it" }}"
             else -> null
         }
 
@@ -86,12 +100,9 @@ class FormularioUsuarioViewModel(
         }
 
         val errorTipo = if (estado.tipo == null) "El rol es obligatorio" else null
-        val errorFecha = when{
-            estado.fechaNacimiento.isBlank() -> "La fecha de nacimiento es obligatoria"
-            !Regex("^\\d{4}-\\d{2}-\\d{2}$").matches(estado.fechaNacimiento.trim()) ->
-                "Formato AAAA-MM-DD"
-            else -> null
-        }
+
+        val errorFecha = if (estado.fechaNacimiento.isBlank()) "La fecha de nacimiento es obligatoria"
+        else errorDeFecha(estado.fechaNacimiento)
 
         val nuevosErrores = ErroresUsuario(
             errorRun = errorRun,
