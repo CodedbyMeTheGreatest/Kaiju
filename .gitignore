@@ -1,21 +1,32 @@
+# Archivos compilados
+*.apk
+*.aar
+*.ap_
+*.dex
+
+# Archivos de Java/Kotlin
+*.class
+
+# Carpetas de compilación y caché
+bin/
+gen/
+out/
+build/
+.gradle/
+
+# Configuraciones locales de Android Studio / IntelliJ
 .idea/
 *.iml
+*.ipr
+*.iws
 
-.gradle/
-build/
-/captures/
-.externalNativeBuild/
-.cxx/
-
-.kotlin/
-
+# Ruta del SDK local
 local.properties
 
-*.jks
-*.keystore
-key.properties
+# Capturas y logs
+captures/
+*.log
 
-.navigation/
-
+# Archivos del sistema operativo
 .DS_Store
 Thumbs.db
