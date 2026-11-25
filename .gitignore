@@ -23,10 +23,15 @@ build/
 # Ruta del SDK local
 local.properties
 
+*.jks
+*.keystore
+key.properties
+!llaves/practica-curso.jks
 # Capturas y logs
 captures/
 *.log
 
-# Archivos del sistema operativo
+.navigation/
+
 .DS_Store
 Thumbs.db

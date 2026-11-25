@@ -10,3 +10,5 @@ fun RolUsuario.tiposMovimientoPermitidos(): List<TipoMovimiento> = when (this) {
     RolUsuario.ENCARGADO_INVENTARIO -> TipoMovimiento.values().toList()
     RolUsuario.ADMINISTRADOR -> listOf(TipoMovimiento.ENTRADA, TipoMovimiento.AJUSTE)
 }
+
+fun RolUsuario.puedeGestionarUsuarios(): Boolean = this == RolUsuario.ADMINISTRADOR

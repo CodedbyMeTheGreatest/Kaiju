@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import kotlin.time.Duration.Companion.milliseconds
 
 class FormularioUsuarioViewModel(
@@ -28,6 +30,16 @@ class FormularioUsuarioViewModel(
 
     private val _mensajeError = MutableStateFlow<String?>(null)
     val mensajeError: StateFlow<String?> = _mensajeError.asStateFlow()
+
+    private val DOMINIOS_VALIDOS = listOf("duoc.cl", "profesor.duoc.cl", "gmail.com")
+
+    private fun errorDeFecha(texto: String): String? =
+        try {
+            if (LocalDate.parse(texto.trim()).isAfter(LocalDate.now())) "La fecha no puede ser futura"
+            else null
+        } catch (e: DateTimeParseException) {
+            "Fecha inválida (AAAA-MM-DD)"
+        }
 
     fun actualizarRun(valor: String) = _estadoFormulario.update { it.copy(run = valor) }
     fun actualizarNombre(valor: String) = _estadoFormulario.update { it.copy(nombre = valor) }
@@ -53,7 +65,7 @@ class FormularioUsuarioViewModel(
                     email = usuario.email,
                     password = "",
                     tipo = usuario.tipo,
-                    fechaNacimiento = usuario.fechaNacimiento,
+                    fechaNacimiento = usuario.fechaNacimiento?.take(10)?:"",
                     activo = usuario.activo
                 )
             }.onFailure { error ->
@@ -65,24 +77,32 @@ class FormularioUsuarioViewModel(
     fun validarFormulario(): Boolean {
         val estado = _estadoFormulario.value
 
-        val errorRun = if (estado.run.isBlank()) "El RUN es obligatorio" else null
+        val errorRun = when {estado.run.isBlank() -> "El RUN es obligatorio"
+            !Regex("^\\d{6,8}[0-9Kk]$").matches(estado.run.trim()) ->
+                "RUN sin puntos ni guion (ej: 12345678K)"
+            else -> null
+        }
         val errorNombre = if (estado.nombre.isBlank()) "El nombre es obligatorio" else null
         val errorApellidos = if (estado.apellidos.isBlank()) "Los apellidos son obligatorios" else null
 
         val errorEmail = when {
             estado.email.isBlank() -> "El correo es obligatorio"
             !estado.email.contains("@") -> "Formato de correo inválido"
+            estado.email.trim().substringAfter("@").lowercase() !in DOMINIOS_VALIDOS ->
+                "Dominio no permitido. Usa: ${DOMINIOS_VALIDOS.joinToString { "@$it" }}"
             else -> null
         }
 
         val errorPassword = when {
             !estado.esEdicion && estado.password.isBlank() -> "La contraseña es obligatoria"
-            estado.password.isNotBlank() && estado.password.length > 64 -> "Máximo 64 caracteres"
+            estado.password.isNotBlank() && estado.password.length !in 4..64 -> "Entre 4 y 64 caracteres"
             else -> null
         }
 
         val errorTipo = if (estado.tipo == null) "El rol es obligatorio" else null
-        val errorFecha = if (estado.fechaNacimiento.isBlank()) "La fecha de nacimiento es obligatoria" else null
+
+        val errorFecha = if (estado.fechaNacimiento.isBlank()) "La fecha de nacimiento es obligatoria"
+        else errorDeFecha(estado.fechaNacimiento)
 
         val nuevosErrores = ErroresUsuario(
             errorRun = errorRun,
@@ -121,7 +141,7 @@ class FormularioUsuarioViewModel(
             val resultado = if (estado.esEdicion) {
                 repository.actualizarUsuario(token, estado.id, usuario)
             } else {
-                repository.crearUsuario(usuario)
+                repository.crearUsuario(token,usuario)
             }
 
             resultado.onSuccess {

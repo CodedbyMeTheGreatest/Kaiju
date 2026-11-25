@@ -10,4 +10,14 @@ sealed class Rutas(val ruta: String) {
         fun crearRuta(codigoProducto: String) = "DetalleProducto/$codigoProducto"
     }
     object Alertas : Rutas("alertas")
+
+    object ListaUsuarios : Rutas("usuarios")
+
+    object DetalleUsuario : Rutas("usuario/{idUsuario}") {
+        fun crearRuta(id: Int) = "usuario/$id"
+    }
+
+    object FormularioUsuario : Rutas("formularioUsuario?id={id}") {
+        fun crearRuta(id: Int = 0) = "formularioUsuario?id=$id"   // 0 = usuario nuevo
+    }
 }

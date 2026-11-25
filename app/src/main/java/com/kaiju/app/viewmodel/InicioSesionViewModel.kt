@@ -55,12 +55,12 @@ class InicioSesionViewModel(
                 _cargando.value = false
                 _estadoFormulario.value = FormularioCuentaEstado()
                 onSuccess(response.token, response.usuario)
-            }.onFailure {
+            }.onFailure { error ->
                 _cargando.value = false
                 _estadoFormulario.update {
                     it.copy(errores = ErroresCuenta(
                         errorEmail = null,
-                        errorContrasenia = "Credenciales incorrectas o Error en el servidor"
+                        errorContrasenia = error.message ?: "Credenciales incorrectas o Error en el servidor"
                     ))
                 }
 
