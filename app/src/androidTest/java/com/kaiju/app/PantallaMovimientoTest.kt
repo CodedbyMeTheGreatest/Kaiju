@@ -59,9 +59,7 @@ class PantallaMovimientoTest {
                 TODO("Not yet implemented")
             }
 
-            override fun obtenerTodos(): Flow<List<Producto>> {
-                TODO("Not yet implemented")
-            }
+            override fun obtenerTodos(): Flow<List<Producto>> = flowOf(emptyList())
 
             override fun obtenerPorCodigo(codigo: String): Flow<Producto?> {
                 TODO("Not yet implemented")
@@ -93,7 +91,7 @@ class PantallaMovimientoTest {
             )
         }
 
-        composeTestRule.onNodeWithText("Guardar Movimiento").performClick()
+        composeTestRule.onNodeWithText("Registrar Movimiento").performClick()
 
         composeTestRule.onNodeWithText("Elige un producto").assertIsDisplayed()
         composeTestRule.onNodeWithText("Elige un tipo de movimiento").assertIsDisplayed()
